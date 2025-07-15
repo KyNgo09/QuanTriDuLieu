@@ -149,9 +149,6 @@ Backend hỗ trợ **8 modules chính** với **40+ endpoints** cho hệ thống
 | PUT    | `/api/hoadon/{id}`              | Cập nhật thông tin hóa đơn       |
 | DELETE | `/api/hoadon/{id}`              | Xóa hóa đơn                      |
 | GET    | `/api/hoadon/khachhang/{ma_kh}` | Lấy hóa đơn của khách hàng       |
-| GET    | `/api/hoadon/ve/{ma_ve}`        | Lấy hóa đơn theo vé              |
-| GET    | `/api/hoadon/combo/{ma_combo}`  | Lấy hóa đơn theo combo           |
-| GET    | `/api/hoadon/doanhthu/{ngay}`   | Thống kê doanh thu theo ngày     |
 
 ### 🛠️ Tính năng đặc biệt
 

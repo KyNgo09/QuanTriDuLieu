@@ -6,3 +6,4 @@ from .combo import combo_bp
 from .khachhang import khachhang_bp
 from .ve import ve_bp
 from .hoadon import hoadon_bp
+from .thongke import thongke_bp

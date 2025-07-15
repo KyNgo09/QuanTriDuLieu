@@ -65,7 +65,7 @@ http://localhost:5000
 
 ### 📋 Tổng quan API Endpoints
 
-Backend hỗ trợ **8 modules chính** với **40+ endpoints** cho hệ thống quản lý rạp chiếu phim:
+Backend hỗ trợ **9 modules chính** với **45+ endpoints** cho hệ thống quản lý rạp chiếu phim:
 
 #### 🎬 1. PHIM (`/api/phim`)
 
@@ -141,14 +141,58 @@ Backend hỗ trợ **8 modules chính** với **40+ endpoints** cho hệ thống
 
 #### 💰 8. HÓA ĐƠN (`/api/hoadon`)
 
-| Method | Endpoint                        | Mô tả                            |
-| ------ | ------------------------------- | -------------------------------- |
-| GET    | `/api/hoadon/`                  | Lấy danh sách tất cả hóa đơn     |
-| GET    | `/api/hoadon/{id}`              | Lấy thông tin chi tiết 1 hóa đơn |
-| POST   | `/api/hoadon/`                  | Tạo hóa đơn mới                  |
-| PUT    | `/api/hoadon/{id}`              | Cập nhật thông tin hóa đơn       |
-| DELETE | `/api/hoadon/{id}`              | Xóa hóa đơn                      |
-| GET    | `/api/hoadon/khachhang/{ma_kh}` | Lấy hóa đơn của khách hàng       |
+| Method | Endpoint                       | Mô tả                            |
+| ------ | ------------------------------ | -------------------------------- |
+| GET    | `/api/hoadon/`                 | Lấy danh sách tất cả hóa đơn     |
+| GET    | `/api/hoadon/{id}`             | Lấy thông tin chi tiết 1 hóa đơn |
+| POST   | `/api/hoadon/`                 | Tạo hóa đơn mới                  |
+| PUT    | `/api/hoadon/{id}`             | Cập nhật thông tin hóa đơn       |
+| DELETE | `/api/hoadon/{id}`             | Xóa hóa đơn                      |
+| GET    | `/api/hoadon/ve/{ma_ve}`       | Lấy hóa đơn theo vé              |
+| GET    | `/api/hoadon/combo/{ma_combo}` | Lấy hóa đơn theo combo           |
+| GET    | `/api/hoadon/doanhthu/{ngay}`  | Thống kê doanh thu theo ngày     |
+
+#### 📊 9. THỐNG KÊ (`/api/thongke`)
+
+| Method | Endpoint                                           | Mô tả                                    |
+| ------ | -------------------------------------------------- | ---------------------------------------- |
+| GET    | `/api/thongke/ty-le-lap-day/{ma_suatchieu}`        | Thống kê tỷ lệ lấp đầy theo suất chiếu   |
+| GET    | `/api/thongke/ty-le-lap-day-tong-quan`             | Thống kê tỷ lệ lấp đầy tất cả suất chiếu |
+| GET    | `/api/thongke/ty-le-lap-day-theo-phong/{ma_phong}` | Thống kê tỷ lệ lấp đầy theo phòng        |
+
+##### 📈 Chi tiết Endpoints Thống kê:
+
+**Tỷ lệ lấp đầy theo suất chiếu:**
+
+```
+GET /api/thongke/ty-le-lap-day/{ma_suatchieu}
+```
+
+- **Mô tả**: Tính tỷ lệ lấp đầy của một suất chiếu cụ thể
+- **Công thức**: `(Số vé đã bán / Tổng số ghế) × 100`
+- **Response**: Thông tin chi tiết suất chiếu, phòng chiếu, phim và tỷ lệ lấp đầy
+- **Trạng thái**: Đầy (100%) | Gần đầy (≥80%) | Còn chỗ (<80%)
+
+##### 📋 Ví dụ Response:
+
+```json
+{
+  "message": "Thống kê tỷ lệ lấp đầy thành công",
+  "data": {
+    "MaSuatChieu": 1,
+    "MaPhong": 1,
+    "TenPhong": "Phòng VIP 1",
+    "MaPhim": 1,
+    "TenPhim": "Avatar 3",
+    "NgayChieu": "2025-07-15",
+    "GioChieu": "19:30:00",
+    "SoLuongVeDaBan": 35,
+    "TongSoGhe": 50,
+    "TyLeLapDay": 70.0,
+    "TrangThai": "Còn chỗ"
+  }
+}
+```
 
 ### 🛠️ Tính năng đặc biệt
 
@@ -169,6 +213,20 @@ Backend hỗ trợ **8 modules chính** với **40+ endpoints** cho hệ thống
 - **POST endpoints** trả về data của record vừa tạo
 - **PUT endpoints** trả về data sau khi cập nhật
 - **Auto-conversion** datetime/timedelta sang JSON format
+
+#### ✅ Advanced Queries
+
+- **JOIN queries** với thông tin chi tiết từ các bảng liên quan
+- **Analytics endpoints** cho thống kê doanh thu
+- **Filter endpoints** theo khách hàng, suất chiếu, combo...
+- **Statistics endpoints** cho thống kê tỷ lệ lấp đầy phòng chiếu
+
+#### ✅ Statistics Features
+
+- **Tỷ lệ lấp đầy** theo suất chiếu cụ thể
+- **Thống kê tổng quan** tất cả suất chiếu
+- **Thống kê theo phòng** với chi tiết từng suất chiếu
+- **Trạng thái phòng** (Đầy/Gần đầy/Còn chỗ)
 
 ### 📊 Response Format
 

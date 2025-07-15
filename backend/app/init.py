@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
-from app.routes import phim_bp, phongchieu_bp, suatchieu_bp, ghe_bp, combo_bp, khachhang_bp, ve_bp, hoadon_bp
+from app.routes import phim_bp, phongchieu_bp, suatchieu_bp, ghe_bp, combo_bp, khachhang_bp, ve_bp, hoadon_bp, thongke_bp
 
 def create_app():
     app = Flask(__name__)
@@ -14,4 +14,5 @@ def create_app():
     app.register_blueprint(khachhang_bp, url_prefix='/api/khachhang')  # Register khachhang blueprint with a URL prefix
     app.register_blueprint(ve_bp, url_prefix='/api/ve')  # Register ve blueprint with a URL prefix
     app.register_blueprint(hoadon_bp, url_prefix='/api/hoadon')  # Register hoadon blueprint with a URL prefix
+    app.register_blueprint(thongke_bp, url_prefix='/api/thongke')  # Register thongke blueprint with a URL prefix
     return app

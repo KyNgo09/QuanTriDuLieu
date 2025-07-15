@@ -1,0 +1,33 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+env/
+venv/
+
+# VS Code
+.vscode/
+
+# macOS junk files
+.DS_Store
+
+# Python egg info
+*.egg-info/
+
+# Database backups or logs (nếu có)
+*.log
+*.sql
+
+# OS junk files
+Thumbs.db
+ehthumbs.db
+Icon?
+
+# Environment variables (nếu có file .env)
+.env
+
+# Pytest cache
+.pytest_cache/

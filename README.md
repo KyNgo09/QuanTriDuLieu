@@ -154,11 +154,9 @@ Backend hỗ trợ **9 modules chính** với **45+ endpoints** cho hệ thống
 
 #### 📊 9. THỐNG KÊ (`/api/thongke`)
 
-| Method | Endpoint                                           | Mô tả                                    |
-| ------ | -------------------------------------------------- | ---------------------------------------- |
-| GET    | `/api/thongke/ty-le-lap-day/{ma_suatchieu}`        | Thống kê tỷ lệ lấp đầy theo suất chiếu   |
-| GET    | `/api/thongke/ty-le-lap-day-tong-quan`             | Thống kê tỷ lệ lấp đầy tất cả suất chiếu |
-| GET    | `/api/thongke/ty-le-lap-day-theo-phong/{ma_phong}` | Thống kê tỷ lệ lấp đầy theo phòng        |
+| Method | Endpoint                                    | Mô tả                                  |
+| ------ | ------------------------------------------- | -------------------------------------- |
+| GET    | `/api/thongke/ty-le-lap-day/{ma_suatchieu}` | Thống kê tỷ lệ lấp đầy theo suất chiếu |
 
 ##### 📈 Chi tiết Endpoints Thống kê:
 

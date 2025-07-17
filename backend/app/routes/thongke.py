@@ -95,14 +95,6 @@ def ty_le_lap_day(ma_suatchieu):
             cursor.close()
         if conn:
             conn.close()
-<<<<<<< HEAD
-            
-
-@thongke_bp.route('/doanh-thu/phim', methods=['GET'])
-def doanh_thu_theo_phim():
-    """
-    API thống kê doanh thu theo từng phim
-=======
 
 
 
@@ -110,47 +102,10 @@ def doanh_thu_theo_phim():
 def doanh_thu_theo_ngay():
     """
     Thống kê doanh thu vé và combo mỗi ngày trong khoảng thời gian
->>>>>>> 51e8df65852db01640a994e8bb16a2685acabda1
     """
     conn = None
     cursor = None
 
-<<<<<<< HEAD
-    try:
-        conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
-
-        cursor.execute("""
-            SELECT 
-                p.MaPhim,
-                p.TenPhim,
-                COUNT(DISTINCT v.MaVe) AS SoLuongVe,
-                COALESCE(SUM(hd.TongTien), 0) AS TongDoanhThu,
-                COUNT(DISTINCT sc.MaSuatChieu) AS SoSuatChieu
-            FROM Phim p
-            LEFT JOIN SuatChieu sc ON p.MaPhim = sc.MaPhim
-            LEFT JOIN Ve v ON sc.MaSuatChieu = v.MaSuatChieu
-            LEFT JOIN HoaDon hd ON v.MaVe = hd.MaVe
-            GROUP BY p.MaPhim, p.TenPhim
-            ORDER BY TongDoanhThu DESC
-        """)
-        rows = cursor.fetchall()
-
-        if not rows:
-            return jsonify({
-                "message": "Không có dữ liệu doanh thu phim"
-            }), 404
-
-        return jsonify({
-            "message": "Thống kê doanh thu theo phim thành công",
-            "data": rows
-        }), 200
-
-    except Exception as e:
-        if conn: conn.rollback()
-        return jsonify({
-            "message": "Lỗi khi thống kê doanh thu phim",
-=======
     start_date = request.args.get('from')
     end_date = request.args.get('to')
 
@@ -213,18 +168,61 @@ def doanh_thu_theo_ngay():
     except Exception as e:
         return jsonify({
             "message": "Lỗi khi thống kê doanh thu",
->>>>>>> 51e8df65852db01640a994e8bb16a2685acabda1
             "error": str(e)
         }), 500
 
     finally:
-<<<<<<< HEAD
-        if cursor: cursor.close()
-        if conn: conn.close()
-=======
         if cursor:
             cursor.close()
         if conn:
             conn.close()
 
->>>>>>> 51e8df65852db01640a994e8bb16a2685acabda1
+
+@thongke_bp.route('/doanh-thu/phim', methods=['GET'])
+def doanh_thu_theo_phim():
+    """
+    API thống kê doanh thu theo từng phim
+    """
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT 
+                p.MaPhim,
+                p.TenPhim,
+                COUNT(DISTINCT v.MaVe) AS SoLuongVe,
+                COALESCE(SUM(hd.TongTien), 0) AS TongDoanhThu,
+                COUNT(DISTINCT sc.MaSuatChieu) AS SoSuatChieu
+            FROM Phim p
+            LEFT JOIN SuatChieu sc ON p.MaPhim = sc.MaPhim
+            LEFT JOIN Ve v ON sc.MaSuatChieu = v.MaSuatChieu
+            LEFT JOIN HoaDon hd ON v.MaVe = hd.MaVe
+            GROUP BY p.MaPhim, p.TenPhim
+            ORDER BY TongDoanhThu DESC
+        """)
+        rows = cursor.fetchall()
+
+        if not rows:
+            return jsonify({
+                "message": "Không có dữ liệu doanh thu phim"
+            }), 404
+
+        return jsonify({
+            "message": "Thống kê doanh thu theo phim thành công",
+            "data": rows
+        }), 200
+
+    except Exception as e:
+        if conn: conn.rollback()
+        return jsonify({
+            "message": "Lỗi khi thống kê doanh thu phim",
+            "error": str(e)
+        }), 500
+
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()

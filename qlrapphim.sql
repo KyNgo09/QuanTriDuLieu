@@ -805,3 +805,9 @@ BEGIN
 END //
 
 DELIMITER ;
+
+ALTER TABLE hoadon
+DROP FOREIGN KEY hoadon_ibfk_2;
+
+ALTER TABLE hoadon
+DROP COLUMN mave;

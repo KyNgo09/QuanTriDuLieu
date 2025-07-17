@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify
 from app.models.db import get_connection
 from app.utils import convert_datetime_fields
+from flask import Blueprint, request, jsonify
+from datetime import datetime
 
 thongke_bp = Blueprint('thongke', __name__)
 
@@ -93,16 +95,27 @@ def ty_le_lap_day(ma_suatchieu):
             cursor.close()
         if conn:
             conn.close()
+<<<<<<< HEAD
             
 
 @thongke_bp.route('/doanh-thu/phim', methods=['GET'])
 def doanh_thu_theo_phim():
     """
     API thống kê doanh thu theo từng phim
+=======
+
+
+
+@thongke_bp.route('/doanh-thu-ngay', methods=['GET'])
+def doanh_thu_theo_ngay():
+    """
+    Thống kê doanh thu vé và combo mỗi ngày trong khoảng thời gian
+>>>>>>> 51e8df65852db01640a994e8bb16a2685acabda1
     """
     conn = None
     cursor = None
 
+<<<<<<< HEAD
     try:
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
@@ -137,9 +150,81 @@ def doanh_thu_theo_phim():
         if conn: conn.rollback()
         return jsonify({
             "message": "Lỗi khi thống kê doanh thu phim",
+=======
+    start_date = request.args.get('from')
+    end_date = request.args.get('to')
+
+    if not start_date or not end_date:
+        return jsonify({"message": "Thiếu tham số 'from' hoặc 'to'"}), 400
+
+    try:
+        start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+        end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = """
+            SELECT 
+                Ngay,
+                SUM(SoVeBan) AS SoVeBan,
+                SUM(DoanhThuVe) AS DoanhThuVe,
+                SUM(SoComboBan) AS SoComboBan,
+                SUM(DoanhThuCombo) AS DoanhThuCombo,
+                SUM(DoanhThuVe) + SUM(DoanhThuCombo) AS TongDoanhThu
+            FROM (
+                -- Thống kê vé theo ngày
+                SELECT 
+                    DATE(NgayDat) AS Ngay,
+                    COUNT(*) AS SoVeBan,
+                    SUM(GiaVe) AS DoanhThuVe,
+                    0 AS SoComboBan,
+                    0 AS DoanhThuCombo
+                FROM ve
+                WHERE DATE(NgayDat) BETWEEN %s AND %s
+                GROUP BY Ngay
+
+                UNION ALL
+
+                -- Thống kê combo theo ngày
+                SELECT 
+                    DATE(NgayMua) AS Ngay,
+                    0 AS SoVeBan,
+                    0 AS DoanhThuVe,
+                    SUM(SoLuong) AS SoComboBan,
+                    SUM(SoLuong * cb.GiaCombo) AS DoanhThuCombo
+                FROM hoadon hd
+                JOIN combo cb ON hd.MaCombo = cb.MaCombo
+                WHERE DATE(NgayMua) BETWEEN %s AND %s
+                GROUP BY Ngay
+            ) AS tong
+            GROUP BY Ngay
+            ORDER BY Ngay ASC
+        """
+
+        cursor.execute(query, (start_date, end_date, start_date, end_date))
+        result = cursor.fetchall()
+
+        return jsonify({
+            "message": "Thống kê doanh thu mỗi ngày thành công",
+            "data": result
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "message": "Lỗi khi thống kê doanh thu",
+>>>>>>> 51e8df65852db01640a994e8bb16a2685acabda1
             "error": str(e)
         }), 500
 
     finally:
+<<<<<<< HEAD
         if cursor: cursor.close()
         if conn: conn.close()
+=======
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+>>>>>>> 51e8df65852db01640a994e8bb16a2685acabda1

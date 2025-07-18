@@ -266,3 +266,114 @@ def get_ve_by_suatchieu(ma_suat_chieu):
             cursor.close()
         if conn:
             conn.close()
+
+@ve_bp.route('/dat-ve', methods=['POST'])
+def dat_ve():
+    """
+    Đặt vé sử dụng procedure sp_DatVe
+    """
+    data = request.get_json()
+    ma_suatchieu = data.get('MaSuatChieu')
+    ma_kh = data.get('MaKH')
+    ma_ghe = data.get('MaGhe')
+
+    if not (ma_suatchieu and ma_kh and ma_ghe):
+        return jsonify({"message": "Thiếu thông tin đặt vé"}), 400
+
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Khai báo biến OUT
+        cursor.execute("SET @p_KetQua = '';")
+        cursor.execute("SET @p_MaVe = NULL;")
+
+        # Gọi procedure
+        cursor.execute(
+            "CALL sp_DatVe(%s, %s, %s, @p_KetQua, @p_MaVe);",
+            (ma_suatchieu, ma_kh, ma_ghe)
+        )
+
+        # Lấy giá trị OUT
+        cursor.execute("SELECT @p_KetQua AS KetQua, @p_MaVe AS MaVe;")
+        result = cursor.fetchone()
+        ket_qua = result[0]
+        ma_ve = result[1]
+
+        if ma_ve:
+            # Lấy thông tin vé vừa đặt
+            cursor.execute(
+                "SELECT * FROM ve WHERE MaVe = %s",
+                (ma_ve,)
+            )
+            ve = cursor.fetchone()
+            columns = ['MaVe', 'MaSuatChieu', 'MaKH', 'MaGhe', 'NgayDat', 'GiaVe', 'TrangThai']
+            ve_dict = dict(zip(columns, ve))
+            convert_datetime_fields(ve_dict)
+            return jsonify({
+                "message": ket_qua,
+                "data": ve_dict
+            }), 201
+        else:
+            return jsonify({"message": ket_qua}), 400
+
+    except Exception as e:
+        return jsonify({"message": "Lỗi khi đặt vé", "error": str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+@ve_bp.route('/huy-ve/<int:ma_ve>', methods=['POST'])
+def huy_ve(ma_ve):
+    """
+    Hủy vé sử dụng procedure sp_HuyVe
+    """
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Khai báo biến OUT
+        cursor.execute("SET @p_KetQua = '';")
+
+        # Gọi procedure
+        cursor.execute(
+            "CALL sp_HuyVe(%s, @p_KetQua);",
+            (ma_ve,)
+        )
+
+        # Lấy giá trị OUT
+        cursor.execute("SELECT @p_KetQua AS KetQua;")
+        result = cursor.fetchone()
+        ket_qua = result[0]
+
+        # Kiểm tra trạng thái hủy
+        if ket_qua == 'Hủy vé thành công!':
+            # Lấy thông tin vé vừa hủy
+            cursor.execute(
+                "SELECT * FROM ve WHERE MaVe = %s",
+                (ma_ve,)
+            )
+            ve = cursor.fetchone()
+            columns = ['MaVe', 'MaSuatChieu', 'MaKH', 'MaGhe', 'NgayDat', 'GiaVe', 'TrangThai']
+            ve_dict = dict(zip(columns, ve))
+            convert_datetime_fields(ve_dict)
+            return jsonify({
+                "message": ket_qua,
+                "data": ve_dict
+            }), 200
+        else:
+            return jsonify({"message": ket_qua}), 400
+
+    except Exception as e:
+        return jsonify({"message": "Lỗi khi hủy vé", "error": str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()

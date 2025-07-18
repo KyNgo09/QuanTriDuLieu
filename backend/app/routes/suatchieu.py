@@ -203,3 +203,47 @@ def delete_suatchieu(ma_suatchieu):
             cursor.close()
         if conn:
             conn.close()
+
+# Lấy lịch chiếu đầy đủ theo ngày
+@suatchieu_bp.route('/lich-chieu-day-du', methods=['GET'])
+def get_lich_chieu_day_du():
+    """
+    Lấy lịch chiếu đầy đủ theo ngày (gọi procedure sp_LayLichChieuDayDu)
+    """
+    ngay = request.args.get('ngay')
+    if not ngay:
+        return jsonify({"message": "Thiếu tham số 'ngay'"}), 400
+
+    try:
+        # Kiểm tra định dạng ngày
+        try:
+            ngay_date = datetime.strptime(ngay, "%Y-%m-%d").date()
+        except ValueError:
+            return jsonify({"message": "Định dạng ngày không hợp lệ, yêu cầu YYYY-MM-DD"}), 400
+
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.callproc('sp_LayLichChieuDayDu', [ngay_date])
+
+        # Lấy kết quả từ procedure
+        for result in cursor.stored_results():
+            data = result.fetchall()
+            break
+        else:
+            data = []
+
+        return jsonify({
+            "message": "Lấy lịch chiếu đầy đủ thành công",
+            "data": data
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "message": "Lỗi khi lấy lịch chiếu đầy đủ",
+            "error": str(e)
+        }), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()

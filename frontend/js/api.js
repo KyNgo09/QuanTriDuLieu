@@ -1,4 +1,3 @@
-// API Configuration
 const API_BASE_URL = 'http://127.0.0.1:5000/api';
 
 // API Helper Functions
@@ -7,8 +6,11 @@ class CinemaAPI {
     static async getMovies() {
         try {
             const response = await fetch(`${API_BASE_URL}/phim/`);
+            console.log('Movies API response:', response);
             if (!response.ok) throw new Error('Failed to fetch movies');
-            return await response.json();
+            const data = await response.json();
+            console.log('Movies API data:', data);
+            return data;
         } catch (error) {
             console.error('Error fetching movies:', error);
             throw error;
@@ -77,8 +79,11 @@ class CinemaAPI {
     static async getCinemaRooms() {
         try {
             const response = await fetch(`${API_BASE_URL}/phongchieu/`);
+            console.log('Rooms API response:', response);
             if (!response.ok) throw new Error('Failed to fetch cinema rooms');
-            return await response.json();
+            const data = await response.json();
+            console.log('Rooms API data:', data);
+            return data;
         } catch (error) {
             console.error('Error fetching cinema rooms:', error);
             throw error;
@@ -154,12 +159,12 @@ function showAlert(message, type = 'success') {
     `;
     
     const container = document.querySelector('.main-content');
-    container.insertBefore(alertDiv, container.firstChild);
-    
-    // Auto dismiss after 3 seconds
-    setTimeout(() => {
-        alertDiv.remove();
-    }, 3000);
+    if (container) {
+        container.insertBefore(alertDiv, container.firstChild);
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
 }
 
 function formatDate(dateString) {
@@ -168,29 +173,27 @@ function formatDate(dateString) {
     return date.toLocaleDateString('vi-VN');
 }
 
+function formatPrice(price) {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+}
 
+// Global Variables
+let currentView = 'table';
 let allMovies = [];
 let filteredMovies = [];
-let currentView = 'table';
+let allRooms = [];
+let filteredRooms = [];
 
-
-// function filterMovies() {
-// }
-// // Search and filter functionality
-// document.getElementById('searchInput').addEventListener('input', filterMovies);
-// document.getElementById('genreFilter').addEventListener('change', filterMovies);
-
+// Movie Management Functions
 function filterMovies() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const genreFilter = document.getElementById('genreFilter').value;
+    const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+    const genreFilter = document.getElementById('genreFilter')?.value || '';
 
     filteredMovies = allMovies.filter(movie => {
         const matchesSearch = movie.TenPhim.toLowerCase().includes(searchTerm) ||
                             movie.TheLoai.toLowerCase().includes(searchTerm) ||
                             movie.DaoDien.toLowerCase().includes(searchTerm);
-        
         const matchesGenre = !genreFilter || movie.TheLoai.includes(genreFilter);
-        
         return matchesSearch && matchesGenre;
     });
 
@@ -200,19 +203,23 @@ function filterMovies() {
         loadCardView(filteredMovies);
     }
 
-    updateEmptyState();
+    updateEmptyState('movies');
 }
 
-function updateEmptyState() {
+function updateEmptyState(type) {
     const emptyState = document.getElementById('emptyState');
     const tableView = document.getElementById('tableView');
     const cardView = document.getElementById('cardView');
 
-    if (filteredMovies.length === 0) {
+    let dataLength = 0;
+    if (type === 'movies') dataLength = filteredMovies.length;
+    else if (type === 'rooms') dataLength = filteredRooms.length;
+
+    if (dataLength === 0 && emptyState && tableView && cardView) {
         emptyState.style.display = 'block';
         tableView.style.display = 'none';
         cardView.style.display = 'none';
-    } else {
+    } else if (emptyState && tableView && cardView) {
         emptyState.style.display = 'none';
         if (currentView === 'table') {
             tableView.style.display = 'block';
@@ -229,46 +236,57 @@ function switchView(viewType) {
     const tableBtn = document.getElementById('tableViewBtn');
     const cardBtn = document.getElementById('cardViewBtn');
 
-    if (viewType === 'table') {
-        tableBtn.classList.add('active');
-        cardBtn.classList.remove('active');
-        loadTableView(filteredMovies);
-    } else {
-        cardBtn.classList.add('active');
-        tableBtn.classList.remove('active');
-        loadCardView(filteredMovies);
+    if (tableBtn && cardBtn) {
+        if (viewType === 'table') {
+            tableBtn.classList.add('active');
+            cardBtn.classList.remove('active');
+        } else {
+            cardBtn.classList.add('active');
+            tableBtn.classList.remove('active');
+        }
     }
 
-    updateEmptyState();
+    if (window.location.pathname.includes('phim.html')) {
+        if (viewType === 'table') loadTableView(filteredMovies);
+        else loadCardView(filteredMovies);
+        updateEmptyState('movies');
+    } else if (window.location.pathname.includes('phongchieu.html')) {
+        if (viewType === 'table') loadRoomTableView(filteredRooms);
+        else loadRoomCardView(filteredRooms);
+        updateEmptyState('rooms');
+    }
 }
 
 function showLoading() {
-    document.getElementById('loadingState').style.display = 'flex';
-    document.getElementById('tableView').style.display = 'none';
-    document.getElementById('cardView').style.display = 'none';
-    document.getElementById('emptyState').style.display = 'none';
+    const loadingState = document.getElementById('loadingState');
+    if (loadingState) loadingState.style.display = 'flex';
+    const tableView = document.getElementById('tableView');
+    if (tableView) tableView.style.display = 'none';
+    const cardView = document.getElementById('cardView');
+    if (cardView) cardView.style.display = 'none';
+    const emptyState = document.getElementById('emptyState');
+    if (emptyState) emptyState.style.display = 'none';
 }
 
 function hideLoading() {
-    document.getElementById('loadingState').style.display = 'none';
+    const loadingState = document.getElementById('loadingState');
+    if (loadingState) loadingState.style.display = 'none';
 }
 
 async function loadMovies() {
     showLoading();
     try {
         const movies = await CinemaAPI.getMovies();
+        console.log('Movies loaded:', movies);
         allMovies = movies;
         filteredMovies = movies;
-        
         updateStats(movies);
-        
         if (currentView === 'table') {
             loadTableView(movies);
         } else {
             loadCardView(movies);
         }
-        
-        updateEmptyState();
+        updateEmptyState('movies');
     } catch (error) {
         showAlert('Lỗi khi tải danh sách phim: ' + error.message, 'danger');
     } finally {
@@ -277,10 +295,7 @@ async function loadMovies() {
 }
 
 function updateStats(movies) {
-    // Animate numbers
     animateNumber('totalMoviesCount', movies.length);
-    
-    // Calculate new movies this month
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
     const newMovies = movies.filter(movie => {
@@ -288,13 +303,9 @@ function updateStats(movies) {
         return releaseDate.getMonth() === currentMonth && releaseDate.getFullYear() === currentYear;
     });
     animateNumber('newMoviesCount', newMovies.length);
-    
-    // Calculate average duration
     const avgDuration = movies.length > 0 ? 
         Math.round(movies.reduce((sum, movie) => sum + movie.ThoiLuong, 0) / movies.length) : 0;
     animateNumber('avgDuration', avgDuration);
-    
-    // Count unique genres
     const genres = new Set();
     movies.forEach(movie => {
         movie.TheLoai.split(',').forEach(genre => genres.add(genre.trim()));
@@ -304,6 +315,7 @@ function updateStats(movies) {
 
 function animateNumber(elementId, targetValue) {
     const element = document.getElementById(elementId);
+    if (!element) return;
     const startValue = 0;
     const duration = 1000;
     const startTime = performance.now();
@@ -312,26 +324,23 @@ function animateNumber(elementId, targetValue) {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / duration, 1);
         const currentValue = Math.floor(startValue + (targetValue - startValue) * progress);
-        
         element.textContent = currentValue;
-        
         if (progress < 1) {
             requestAnimationFrame(updateNumber);
         }
     }
-    
     requestAnimationFrame(updateNumber);
 }
 
 function loadTableView(movies) {
     const tbody = document.getElementById('moviesTableBody');
+    if (!tbody) return;
     tbody.innerHTML = '';
 
     movies.forEach((movie, index) => {
         const row = document.createElement('tr');
         row.className = 'slide-in-right';
         row.style.animationDelay = `${index * 0.05}s`;
-        
         row.innerHTML = `
             <td>
                 <div class="ultra-item-visual" style="width: 80px; height: 60px; margin: 0;">
@@ -376,20 +385,18 @@ function loadTableView(movies) {
 
 function loadCardView(movies) {
     const cardContainer = document.getElementById('cardView');
+    if (!cardContainer) return;
     cardContainer.innerHTML = '';
 
     movies.forEach((movie, index) => {
         const cardDiv = document.createElement('div');
         cardDiv.className = 'ultra-item-card scale-in';
         cardDiv.style.animationDelay = `${index * 0.1}s`;
-        
         cardDiv.innerHTML = `
             <div class="ultra-item-visual">
                 <i class="fas fa-film" style="font-size: 3rem; color: white;"></i>
             </div>
-            
             <h3 class="ultra-item-title">${movie.TenPhim}</h3>
-            
             <div class="ultra-item-meta">
                 <div class="ultra-item-meta-row">
                     <span><i class="fas fa-tags me-2"></i>Thể loại</span>
@@ -412,7 +419,6 @@ function loadCardView(movies) {
                     <span class="ultra-badge ${getAgeRatingClass(movie.DoTuoiChoPhep)}">${movie.DoTuoiChoPhep}</span>
                 </div>
             </div>
-            
             <div class="ultra-item-actions">
                 <button class="ultra-btn ultra-btn-warning ultra-btn-sm flex-fill" onclick="editMovie(${movie.MaPhim})">
                     <i class="fas fa-edit me-2"></i>Sửa
@@ -438,16 +444,20 @@ function getAgeRatingClass(rating) {
 }
 
 function openAddModal() {
-    document.getElementById('movieModalTitle').innerHTML = '<i class="fas fa-plus-circle me-3"></i>Thêm Phim Mới';
-    document.getElementById('movieForm').reset();
-    document.getElementById('movieId').value = '';
+    if (window.location.pathname.includes('phim.html')) {
+        document.getElementById('movieModalTitle').innerHTML = '<i class="fas fa-plus-circle me-3"></i>Thêm Phim Mới';
+        document.getElementById('movieForm').reset();
+        document.getElementById('movieId').value = '';
+    } else if (window.location.pathname.includes('phongchieu.html')) {
+        document.getElementById('roomModalTitle').innerHTML = '<i class="fas fa-plus-circle me-3"></i>Thêm Phòng Chiếu Mới';
+        document.getElementById('roomForm').reset();
+        document.getElementById('roomId').value = '';
+    }
 }
 
 async function editMovie(id) {
     try {
-        const response = await fetch(`${API_BASE_URL}/phim/${id}`);
-        const movie = await response.json();
-        
+        const movie = await CinemaAPI.getMovie(id);
         document.getElementById('movieModalTitle').innerHTML = '<i class="fas fa-edit me-3"></i>Chỉnh Sửa Phim';
         document.getElementById('movieId').value = movie.MaPhim;
         document.getElementById('tenPhim').value = movie.TenPhim;
@@ -456,7 +466,6 @@ async function editMovie(id) {
         document.getElementById('thoiLuong').value = movie.ThoiLuong;
         document.getElementById('ngayKhoiChieu').value = movie.NgayKhoiChieu;
         document.getElementById('doTuoiChoPhep').value = movie.DoTuoiChoPhep;
-        
         new bootstrap.Modal(document.getElementById('movieModal')).show();
     } catch (error) {
         showAlert('Lỗi khi tải thông tin phim: ' + error.message, 'danger');
@@ -488,7 +497,6 @@ async function saveMovie() {
             await CinemaAPI.createMovie(movieData);
             showAlert('Thêm phim thành công!', 'success');
         }
-        
         bootstrap.Modal.getInstance(document.getElementById('movieModal')).hide();
         loadMovies();
     } catch (error) {
@@ -508,108 +516,21 @@ async function deleteMovie(id) {
     }
 }
 
-// Initialize page when sidebar is loaded
-document.addEventListener('sidebarLoaded', function() {
-    loadMovies();
-});
-
-// Fallback: load movies if sidebar is already loaded
-if (window.sidebarManager && window.sidebarManager.isLoaded()) {
-    loadMovies();
-}
-
-// Search and filter functionality
-document.getElementById('searchInput').addEventListener('input', filterRooms);
-document.getElementById('roomTypeFilter').addEventListener('change', filterRooms);
-
-function filterRooms() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const typeFilter = document.getElementById('roomTypeFilter').value;
-
-    filteredRooms = allRooms.filter(room => {
-        const matchesSearch = room.TenPhong.toLowerCase().includes(searchTerm) ||
-                            room.LoaiPhong.toLowerCase().includes(searchTerm);
-        
-        const matchesType = !typeFilter || room.LoaiPhong === typeFilter;
-        
-        return matchesSearch && matchesType;
-    });
-
-    if (currentView === 'table') {
-        loadTableView(filteredRooms);
-    } else {
-        loadCardView(filteredRooms);
-    }
-
-    updateEmptyState();
-}
-
-function updateEmptyState() {
-    const emptyState = document.getElementById('emptyState');
-    const tableView = document.getElementById('tableView');
-    const cardView = document.getElementById('cardView');
-
-    if (filteredRooms.length === 0) {
-        emptyState.style.display = 'block';
-        tableView.style.display = 'none';
-        cardView.style.display = 'none';
-    } else {
-        emptyState.style.display = 'none';
-        if (currentView === 'table') {
-            tableView.style.display = 'block';
-            cardView.style.display = 'none';
-        } else {
-            tableView.style.display = 'none';
-            cardView.style.display = 'grid';
-        }
-    }
-}
-
-function switchView(viewType) {
-    currentView = viewType;
-    const tableBtn = document.getElementById('tableViewBtn');
-    const cardBtn = document.getElementById('cardViewBtn');
-
-    if (viewType === 'table') {
-        tableBtn.classList.add('active');
-        cardBtn.classList.remove('active');
-        loadTableView(filteredRooms);
-    } else {
-        cardBtn.classList.add('active');
-        tableBtn.classList.remove('active');
-        loadCardView(filteredRooms);
-    }
-
-    updateEmptyState();
-}
-// let filteredRooms = allRooms.filter();
-function showLoading() {
-    document.getElementById('loadingState').style.display = 'flex';
-    document.getElementById('tableView').style.display = 'none';
-    document.getElementById('cardView').style.display = 'none';
-    document.getElementById('emptyState').style.display = 'none';
-}
-
-function hideLoading() {
-    document.getElementById('loadingState').style.display = 'none';
-}
-
+// Room Management Functions
 async function loadCinemaRooms() {
     showLoading();
     try {
         const rooms = await CinemaAPI.getCinemaRooms();
+        console.log('Rooms loaded:', rooms);
         allRooms = rooms;
         filteredRooms = rooms;
-        
-        updateStats(rooms);
-        
+        updateRoomStats(rooms);
         if (currentView === 'table') {
-            loadTableView(rooms);
+            loadRoomTableView(rooms);
         } else {
-            loadCardView(rooms);
+            loadRoomCardView(rooms);
         }
-        
-        updateEmptyState();
+        updateEmptyState('rooms');
     } catch (error) {
         showAlert('Lỗi khi tải danh sách phòng chiếu: ' + error.message, 'danger');
     } finally {
@@ -617,50 +538,25 @@ async function loadCinemaRooms() {
     }
 }
 
-function updateStats(rooms) {
-    // Animate numbers
+function updateRoomStats(rooms) {
     animateNumber('totalRoomsCount', rooms.length);
-    
     const totalSeats = rooms.reduce((sum, room) => sum + room.SoGhe, 0);
     animateNumber('totalSeatsCount', totalSeats);
-    
     const avgSeats = rooms.length > 0 ? Math.round(totalSeats / rooms.length) : 0;
     animateNumber('avgSeatsCount', avgSeats);
-    
     const roomTypes = new Set(rooms.map(room => room.LoaiPhong));
     animateNumber('roomTypesCount', roomTypes.size);
 }
 
-function animateNumber(elementId, targetValue) {
-    const element = document.getElementById(elementId);
-    const startValue = 0;
-    const duration = 1000;
-    const startTime = performance.now();
-
-    function updateNumber(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const currentValue = Math.floor(startValue + (targetValue - startValue) * progress);
-        
-        element.textContent = currentValue;
-        
-        if (progress < 1) {
-            requestAnimationFrame(updateNumber);
-        }
-    }
-    
-    requestAnimationFrame(updateNumber);
-}
-
-function loadTableView(rooms) {
+function loadRoomTableView(rooms) {
     const tbody = document.getElementById('roomsTableBody');
+    if (!tbody) return;
     tbody.innerHTML = '';
 
     rooms.forEach((room, index) => {
         const row = document.createElement('tr');
         row.className = 'slide-in-right';
         row.style.animationDelay = `${index * 0.05}s`;
-        
         row.innerHTML = `
             <td>
                 <div class="ultra-item-visual" style="width: 80px; height: 60px; margin: 0; background: ${getRoomTypeGradient(room.LoaiPhong)};">
@@ -701,15 +597,15 @@ function loadTableView(rooms) {
     });
 }
 
-function loadCardView(rooms) {
+function loadRoomCardView(rooms) {
     const cardContainer = document.getElementById('cardView');
+    if (!cardContainer) return;
     cardContainer.innerHTML = '';
 
     rooms.forEach((room, index) => {
         const cardDiv = document.createElement('div');
         cardDiv.className = 'ultra-item-card scale-in';
         cardDiv.style.animationDelay = `${index * 0.1}s`;
-        
         cardDiv.innerHTML = `
             <div class="ultra-item-visual" style="background: ${getRoomTypeGradient(room.LoaiPhong)};">
                 <div style="text-align: center;">
@@ -717,9 +613,7 @@ function loadCardView(rooms) {
                     <div style="font-weight: 700; color: white; font-size: 1.2rem;">${room.LoaiPhong}</div>
                 </div>
             </div>
-            
             <h3 class="ultra-item-title">${room.TenPhong}</h3>
-            
             <div class="ultra-item-meta">
                 <div class="ultra-item-meta-row">
                     <span><i class="fas fa-cog me-2"></i>Loại phòng</span>
@@ -736,7 +630,6 @@ function loadCardView(rooms) {
                     </span>
                 </div>
             </div>
-            
             <div class="ultra-item-actions">
                 <button class="ultra-btn ultra-btn-warning ultra-btn-sm flex-fill" onclick="editRoom(${room.MaPhong})">
                     <i class="fas fa-edit me-2"></i>Sửa
@@ -774,23 +667,14 @@ function getRoomTypeGradient(type) {
     return gradients[type] || gradients['2D'];
 }
 
-function openAddModal() {
-    document.getElementById('roomModalTitle').innerHTML = '<i class="fas fa-plus-circle me-3"></i>Thêm Phòng Chiếu Mới';
-    document.getElementById('roomForm').reset();
-    document.getElementById('roomId').value = '';
-}
-
 async function editRoom(id) {
     try {
-        const response = await fetch(`${API_BASE_URL}/phongchieu/${id}`);
-        const room = await response.json();
-        
+        const room = await CinemaAPI.getCinemaRoom(id);
         document.getElementById('roomModalTitle').innerHTML = '<i class="fas fa-edit me-3"></i>Chỉnh Sửa Phòng Chiếu';
         document.getElementById('roomId').value = room.MaPhong;
         document.getElementById('tenPhong').value = room.TenPhong;
         document.getElementById('soGhe').value = room.SoGhe;
         document.getElementById('loaiPhong').value = room.LoaiPhong;
-        
         new bootstrap.Modal(document.getElementById('roomModal')).show();
     } catch (error) {
         showAlert('Lỗi khi tải thông tin phòng chiếu: ' + error.message, 'danger');
@@ -819,7 +703,6 @@ async function saveRoom() {
             await CinemaAPI.createCinemaRoom(roomData);
             showAlert('Thêm phòng chiếu thành công!', 'success');
         }
-        
         bootstrap.Modal.getInstance(document.getElementById('roomModal')).hide();
         loadCinemaRooms();
     } catch (error) {
@@ -839,12 +722,61 @@ async function deleteRoom(id) {
     }
 }
 
-// Initialize page when sidebar is loaded
+function filterRooms() {
+    const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+    const typeFilter = document.getElementById('roomTypeFilter')?.value || '';
+
+    filteredRooms = allRooms.filter(room => {
+        const matchesSearch = room.TenPhong.toLowerCase().includes(searchTerm) ||
+                            room.LoaiPhong.toLowerCase().includes(searchTerm);
+        const matchesType = !typeFilter || room.LoaiPhong === typeFilter;
+        return matchesSearch && matchesType;
+    });
+
+    if (currentView === 'table') {
+        loadRoomTableView(filteredRooms);
+    } else {
+        loadRoomCardView(filteredRooms);
+    }
+    updateEmptyState('rooms');
+}
+
+// Initialize page
 document.addEventListener('sidebarLoaded', function() {
-    loadCinemaRooms();
+    console.log('Sidebar loaded');
+    if (window.location.pathname.includes('phim.html')) {
+        console.log('Initializing movies');
+        loadMovies();
+        document.getElementById('searchInput')?.addEventListener('input', filterMovies);
+        document.getElementById('genreFilter')?.addEventListener('change', filterMovies);
+    } else if (window.location.pathname.includes('phongchieu.html')) {
+        console.log('Initializing rooms');
+        loadCinemaRooms();
+        document.getElementById('searchInput')?.addEventListener('input', filterRooms);
+        document.getElementById('roomTypeFilter')?.addEventListener('change', filterRooms);
+    }
 });
 
-// Fallback: load data if sidebar is already loaded
 if (window.sidebarManager && window.sidebarManager.isLoaded()) {
-    loadCinemaRooms();
+    console.log('Sidebar already loaded');
+    if (window.location.pathname.includes('phim.html')) {
+        loadMovies();
+        document.getElementById('searchInput')?.addEventListener('input', filterMovies);
+        document.getElementById('genreFilter')?.addEventListener('change', filterMovies);
+    } else if (window.location.pathname.includes('phongchieu.html')) {
+        loadCinemaRooms();
+        document.getElementById('searchInput')?.addEventListener('input', filterRooms);
+        document.getElementById('roomTypeFilter')?.addEventListener('change', filterRooms);
+    }
 }
+
+// Fallback to load data if sidebar fails
+window.addEventListener('load', function() {
+    if (window.location.pathname.includes('phim.html')) {
+        console.log('Fallback: Initializing movies');
+        loadMovies();
+    } else if (window.location.pathname.includes('phongchieu.html')) {
+        console.log('Fallback: Initializing rooms');
+        loadCinemaRooms();
+    }
+});

@@ -48,6 +48,27 @@ def get_ghe_by_id(ma_ghe):
         if conn:
             conn.close()
 
+# Lấy danh sách ghế theo phòng
+@ghe_bp.route('/phong/<int:ma_phong>', methods=['GET'])
+def get_ghe_by_phong(ma_phong):
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT * FROM Ghe WHERE MaPhong = %s
+        """, (ma_phong,))
+        data = cursor.fetchall()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"message": "Lỗi khi lấy danh sách ghế", "error": str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
 # Thêm ghế mới
 @ghe_bp.route('/', methods=['POST'])
 def create_ghe():

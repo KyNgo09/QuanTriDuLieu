@@ -61,7 +61,6 @@ def get_hoadon_by_id(ma_hoa_don):
 def create_hoadon():
     data = request.get_json()
     ma_kh = data.get('MaKH')
-    ma_ve = data.get('MaVe')
     ma_combo = data.get('MaCombo')
     so_luong = data.get('SoLuong', 1)  # Default: 1
 
@@ -73,9 +72,9 @@ def create_hoadon():
 
         # Nếu không có ngày mua, sử dụng CURRENT_TIMESTAMP
         cursor.execute("""
-            INSERT INTO hoadon (MaKH, MaVe, MaCombo, SoLuong)
-            VALUES (%s, %s, %s, %s)
-        """, (ma_kh, ma_ve, ma_combo, so_luong))
+            INSERT INTO hoadon (MaKH, MaCombo, SoLuong)
+            VALUES (%s, %s, %s)
+        """, (ma_kh, ma_combo, so_luong))
 
         # Lấy ID của hóa đơn vừa được thêm
         ma_hoa_don_moi = cursor.lastrowid
@@ -86,7 +85,7 @@ def create_hoadon():
         hoadon_moi = cursor.fetchone()
         
         # Chuyển đổi tuple thành dictionary
-        columns = ['MaHoaDon', 'MaKH', 'MaVe', 'MaCombo', 'SoLuong', 'NgayMua', 'TongTien']
+        columns = ['MaHoaDon', 'MaKH', 'MaCombo', 'SoLuong', 'NgayMua', 'TongTien']
         hoadon_dict = dict(zip(columns, hoadon_moi))
         
         # Chuyển đổi các kiểu dữ liệu datetime
@@ -130,7 +129,6 @@ def update_hoadon(ma_hoa_don):
         # Chỉ cập nhật những trường có trong request data
         field_mapping = {
             'MaKH': 'MaKH',
-            'MaVe': 'MaVe',
             'MaCombo': 'MaCombo',
             'SoLuong': 'SoLuong',
             'NgayMua': 'NgayMua',
@@ -212,11 +210,9 @@ def get_hoadon_by_khachhang(ma_kh):
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
             SELECT hd.*, kh.TenKH, 
-                   v.MaSuatChieu, v.MaGhe, v.NgayDat as NgayDatVe, v.TrangThai as TrangThaiVe,
                    c.TenCombo, c.GiaCombo, c.MoTa as MoTaCombo
             FROM hoadon hd
             JOIN khachhang kh ON hd.MaKH = kh.MaKH
-            LEFT JOIN ve v ON hd.MaVe = v.MaVe
             LEFT JOIN combo c ON hd.MaCombo = c.MaCombo
             WHERE hd.MaKH = %s
             ORDER BY hd.NgayMua DESC

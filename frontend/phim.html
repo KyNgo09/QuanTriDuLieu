@@ -1,235 +1,336 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quản Lý Phim - Cinema Manager</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="css/sidebar.css" rel="stylesheet">
-    <link href="css/styles.css" rel="stylesheet">
-</head>
-<body>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="css/sidebar.css" rel="stylesheet" />
+    <link href="css/styles.css" rel="stylesheet" />
+  </head>
+  <body>
     <!-- Sidebar will be loaded here -->
     <div id="sidebar-container"></div>
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Ultra Modern Header -->
-        <div class="ultra-header fade-in-up">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="ultra-header-title">
-                        <i class="fas fa-film"></i>
-                        Quản Lý Phim
-                    </h1>
-                    <p class="ultra-header-subtitle">Khám phá và quản lý bộ sưu tập phim của bạn với giao diện hiện đại</p>
-                </div>
-                <button class="ultra-btn ultra-btn-primary" data-bs-toggle="modal" data-bs-target="#movieModal" onclick="openAddModal()">
-                    <i class="fas fa-plus me-2"></i>Thêm Phim Mới
-                </button>
-            </div>
-        </div>
-
-        <!-- Modern Search Container -->
-        <div class="ultra-search-container fade-in-up" style="animation-delay: 0.1s;">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <div class="position-relative">
-                        <i class="fas fa-search position-absolute" style="left: 1.5rem; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.5); z-index: 2;"></i>
-                        <input type="text" class="ultra-search-input" id="searchInput" placeholder="Tìm kiếm phim theo tên, thể loại, đạo diễn..." style="padding-left: 4rem;">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <select class="ultra-form-control" id="genreFilter">
-                        <option value="">Tất cả thể loại</option>
-                        <option value="Hành động">Hành động</option>
-                        <option value="Hài kịch">Hài kịch</option>
-                        <option value="Kinh dị">Kinh dị</option>
-                        <option value="Lãng mạn">Lãng mạn</option>
-                        <option value="Khoa học viễn tưởng">Khoa học viễn tưởng</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <div class="ultra-view-toggle">
-                        <button class="ultra-btn active" id="tableViewBtn" onclick="switchView('table')">
-                            <i class="fas fa-table me-2"></i>Bảng
-                        </button>
-                        <button class="ultra-btn" id="cardViewBtn" onclick="switchView('card')">
-                            <i class="fas fa-th-large me-2"></i>Thẻ
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Stats Grid -->
-        <div class="stats-grid fade-in-up" style="animation-delay: 0.2s;">
-            <div class="ultra-stat-card">
-                <div class="ultra-stat-number" id="totalMoviesCount">0</div>
-                <div class="ultra-stat-label">Tổng số phim</div>
-                <i class="fas fa-film ultra-stat-icon"></i>
-            </div>
-            <div class="ultra-stat-card">
-                <div class="ultra-stat-number" id="newMoviesCount">0</div>
-                <div class="ultra-stat-label">Phim mới tháng này</div>
-                <i class="fas fa-plus-circle ultra-stat-icon"></i>
-            </div>
-            <div class="ultra-stat-card">
-                <div class="ultra-stat-number" id="avgDuration">0</div>
-                <div class="ultra-stat-label">Thời lượng TB (phút)</div>
-                <i class="fas fa-clock ultra-stat-icon"></i>
-            </div>
-            <div class="ultra-stat-card">
-                <div class="ultra-stat-number" id="genreCount">0</div>
-                <div class="ultra-stat-label">Thể loại khác nhau</div>
-                <i class="fas fa-tags ultra-stat-icon"></i>
-            </div>
-        </div>
-
-        <!-- Table View -->
-        <div id="tableView" class="ultra-table-container fade-in-up" style="animation-delay: 0.3s;">
-            <table class="ultra-table">
-                <thead>
-                    <tr>
-                        <th>Visual</th>
-                        <th>Thông tin phim</th>
-                        <th>Thể loại</th>
-                        <th>Đạo diễn</th>
-                        <th>Thời lượng</th>
-                        <th>Ngày khởi chiếu</th>
-                        <th>Độ tuổi</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody id="moviesTableBody">
-                    <!-- Movies will be loaded here -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Card View -->
-        <div id="cardView" class="ultra-grid" style="display: none;">
-            <!-- Movie cards will be loaded here -->
-        </div>
-
-        <!-- Empty State -->
-        <div id="emptyState" class="ultra-empty-state" style="display: none;">
-            <div class="ultra-empty-icon">
-                <i class="fas fa-film"></i>
-            </div>
-            <h3 class="ultra-empty-title">Chưa có phim nào</h3>
-            <p class="ultra-empty-description">
-                Hãy thêm phim đầu tiên để bắt đầu xây dựng thư viện phim tuyệt vời của bạn. 
-                Khám phá thế giới điện ảnh với giao diện hiện đại và trực quan.
+      <!-- Ultra Modern Header -->
+      <div class="ultra-header fade-in-up">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h1 class="ultra-header-title">
+              <i class="fas fa-film"></i>
+              Quản Lý Phim
+            </h1>
+            <p class="ultra-header-subtitle">
+              Khám phá và quản lý bộ sưu tập phim của bạn với giao diện hiện đại
             </p>
-            <button class="ultra-btn ultra-btn-primary" data-bs-toggle="modal" data-bs-target="#movieModal" onclick="openAddModal()">
-                <i class="fas fa-plus me-2"></i>Thêm Phim Đầu Tiên
-            </button>
+          </div>
+          <button
+            class="ultra-btn ultra-btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#movieModal"
+            onclick="openAddModal()"
+          >
+            <i class="fas fa-plus me-2"></i>Thêm Phim Mới
+          </button>
         </div>
+      </div>
 
-        <!-- Loading State -->
-        <div id="loadingState" class="ultra-loading" style="display: none;">
-            <div class="ultra-spinner"></div>
+      <!-- Modern Search Container -->
+      <div
+        class="ultra-search-container fade-in-up"
+        style="animation-delay: 0.1s"
+      >
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <div class="position-relative">
+              <i
+                class="fas fa-search position-absolute"
+                style="
+                  left: 1.5rem;
+                  top: 50%;
+                  transform: translateY(-50%);
+                  color: rgba(255, 255, 255, 0.5);
+                  z-index: 2;
+                "
+              ></i>
+              <input
+                type="text"
+                class="ultra-search-input"
+                id="searchInput"
+                placeholder="Tìm kiếm phim theo tên, thể loại, đạo diễn..."
+                style="padding-left: 4rem"
+              />
+            </div>
+          </div>
+          <div class="col-md-3">
+            <select class="ultra-form-control" id="genreFilter">
+              <option value="">Tất cả thể loại</option>
+              <option value="Hành động">Hành động</option>
+              <option value="Hài kịch">Hài kịch</option>
+              <option value="Kinh dị">Kinh dị</option>
+              <option value="Lãng mạn">Lãng mạn</option>
+              <option value="Khoa học viễn tưởng">Khoa học viễn tưởng</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <div class="ultra-view-toggle">
+              <button
+                class="ultra-btn active"
+                id="tableViewBtn"
+                onclick="switchView('table')"
+              >
+                <i class="fas fa-table me-2"></i>Bảng
+              </button>
+              <button
+                class="ultra-btn"
+                id="cardViewBtn"
+                onclick="switchView('card')"
+              >
+                <i class="fas fa-th-large me-2"></i>Thẻ
+              </button>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid fade-in-up" style="animation-delay: 0.2s">
+        <div class="ultra-stat-card">
+          <div class="ultra-stat-number" id="totalMoviesCount">0</div>
+          <div class="ultra-stat-label">Tổng số phim</div>
+          <i class="fas fa-film ultra-stat-icon"></i>
+        </div>
+        <div class="ultra-stat-card">
+          <div class="ultra-stat-number" id="newMoviesCount">0</div>
+          <div class="ultra-stat-label">Phim mới tháng này</div>
+          <i class="fas fa-plus-circle ultra-stat-icon"></i>
+        </div>
+        <div class="ultra-stat-card">
+          <div class="ultra-stat-number" id="avgDuration">0</div>
+          <div class="ultra-stat-label">Thời lượng TB (phút)</div>
+          <i class="fas fa-clock ultra-stat-icon"></i>
+        </div>
+        <div class="ultra-stat-card">
+          <div class="ultra-stat-number" id="genreCount">0</div>
+          <div class="ultra-stat-label">Thể loại khác nhau</div>
+          <i class="fas fa-tags ultra-stat-icon"></i>
+        </div>
+      </div>
+
+      <!-- Table View -->
+      <div
+        id="tableView"
+        class="ultra-table-container fade-in-up"
+        style="animation-delay: 0.3s"
+      >
+        <table class="ultra-table">
+          <thead>
+            <tr>
+              <th>Visual</th>
+              <th>Thông tin phim</th>
+              <th>Thể loại</th>
+              <th>Đạo diễn</th>
+              <th>Thời lượng</th>
+              <th>Ngày khởi chiếu</th>
+              <th>Độ tuổi</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="moviesTableBody">
+            <!-- Movies will be loaded here -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Card View -->
+      <div id="cardView" class="ultra-grid" style="display: none">
+        <!-- Movie cards will be loaded here -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="emptyState" class="ultra-empty-state" style="display: none">
+        <div class="ultra-empty-icon">
+          <i class="fas fa-film"></i>
+        </div>
+        <h3 class="ultra-empty-title">Chưa có phim nào</h3>
+        <p class="ultra-empty-description">
+          Hãy thêm phim đầu tiên để bắt đầu xây dựng thư viện phim tuyệt vời của
+          bạn. Khám phá thế giới điện ảnh với giao diện hiện đại và trực quan.
+        </p>
+        <button
+          class="ultra-btn ultra-btn-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#movieModal"
+          onclick="openAddModal()"
+        >
+          <i class="fas fa-plus me-2"></i>Thêm Phim Đầu Tiên
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      <div id="loadingState" class="ultra-loading" style="display: none">
+        <div class="ultra-spinner"></div>
+      </div>
     </div>
 
     <!-- Floating Action Button -->
-    <button class="fab" data-bs-toggle="modal" data-bs-target="#movieModal" onclick="openAddModal()">
-        <i class="fas fa-plus"></i>
+    <button
+      class="fab"
+      data-bs-toggle="modal"
+      data-bs-target="#movieModal"
+      onclick="openAddModal()"
+    >
+      <i class="fas fa-plus"></i>
     </button>
 
     <!-- Ultra Modern Movie Modal -->
     <div class="modal fade ultra-modal" id="movieModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="movieModalTitle">
-                        <i class="fas fa-plus-circle me-3"></i>Thêm Phim Mới
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="movieModalTitle">
+              <i class="fas fa-plus-circle me-3"></i>Thêm Phim Mới
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="movieForm">
+              <input type="hidden" id="movieId" />
+              <div class="row">
+                <div class="col-md-8">
+                  <div class="ultra-form-group">
+                    <label for="tenPhim" class="ultra-form-label">
+                      <i class="fas fa-film me-2"></i>Tên Phim
+                    </label>
+                    <input
+                      type="text"
+                      class="ultra-form-control"
+                      id="tenPhim"
+                      required
+                      placeholder="Nhập tên phim"
+                    />
+                  </div>
                 </div>
-                <div class="modal-body">
-                    <form id="movieForm">
-                        <input type="hidden" id="movieId">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div class="ultra-form-group">
-                                    <label for="tenPhim" class="ultra-form-label">
-                                        <i class="fas fa-film me-2"></i>Tên Phim
-                                    </label>
-                                    <input type="text" class="ultra-form-control" id="tenPhim" required placeholder="Nhập tên phim">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="ultra-form-group">
-                                    <label for="doTuoiChoPhep" class="ultra-form-label">
-                                        <i class="fas fa-users me-2"></i>Độ Tuổi
-                                    </label>
-                                    <select class="ultra-form-control" id="doTuoiChoPhep" required>
-                                        <option value="">Chọn độ tuổi</option>
-                                        <option value="P">P - Phù hợp mọi lứa tuổi</option>
-                                        <option value="K">K - Dưới 13 tuổi có người lớn đi kèm</option>
-                                        <option value="T13">T13 - Từ 13 tuổi trở lên</option>
-                                        <option value="T16">T16 - Từ 16 tuổi trở lên</option>
-                                        <option value="T18">T18 - Từ 18 tuổi trở lên</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="ultra-form-group">
-                                    <label for="theLoai" class="ultra-form-label">
-                                        <i class="fas fa-tags me-2"></i>Thể Loại
-                                    </label>
-                                    <input type="text" class="ultra-form-control" id="theLoai" required placeholder="VD: Hành động, Khoa học viễn tưởng">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="ultra-form-group">
-                                    <label for="daoDien" class="ultra-form-label">
-                                        <i class="fas fa-user-tie me-2"></i>Đạo Diễn
-                                    </label>
-                                    <input type="text" class="ultra-form-control" id="daoDien" required placeholder="Nhập tên đạo diễn">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="ultra-form-group">
-                                    <label for="thoiLuong" class="ultra-form-label">
-                                        <i class="fas fa-clock me-2"></i>Thời Lượng (phút)
-                                    </label>
-                                    <input type="number" class="ultra-form-control" id="thoiLuong" min="1" required placeholder="120">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="ultra-form-group">
-                                    <label for="ngayKhoiChieu" class="ultra-form-label">
-                                        <i class="fas fa-calendar me-2"></i>Ngày Khởi Chiếu
-                                    </label>
-                                    <input type="date" class="ultra-form-control" id="ngayKhoiChieu" required>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
+                <div class="col-md-4">
+                  <div class="ultra-form-group">
+                    <label for="doTuoiChoPhep" class="ultra-form-label">
+                      <i class="fas fa-users me-2"></i>Độ Tuổi
+                    </label>
+                    <select
+                      class="ultra-form-control"
+                      id="doTuoiChoPhep"
+                      required
+                    >
+                      <option value="">Chọn độ tuổi</option>
+                      <option value="P">P - Phù hợp mọi lứa tuổi</option>
+                      <option value="K">
+                        K - Dưới 13 tuổi có người lớn đi kèm
+                      </option>
+                      <option value="T13">T13 - Từ 13 tuổi trở lên</option>
+                      <option value="T16">T16 - Từ 16 tuổi trở lên</option>
+                      <option value="T18">T18 - Từ 18 tuổi trở lên</option>
+                    </select>
+                  </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="ultra-btn ultra-btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>Hủy
-                    </button>
-                    <button type="button" class="ultra-btn ultra-btn-primary" onclick="saveMovie()">
-                        <i class="fas fa-save me-2"></i>Lưu Phim
-                    </button>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="ultra-form-group">
+                    <label for="theLoai" class="ultra-form-label">
+                      <i class="fas fa-tags me-2"></i>Thể Loại
+                    </label>
+                    <input
+                      type="text"
+                      class="ultra-form-control"
+                      id="theLoai"
+                      required
+                      placeholder="VD: Hành động, Khoa học viễn tưởng"
+                    />
+                  </div>
                 </div>
-            </div>
+                <div class="col-md-6">
+                  <div class="ultra-form-group">
+                    <label for="daoDien" class="ultra-form-label">
+                      <i class="fas fa-user-tie me-2"></i>Đạo Diễn
+                    </label>
+                    <input
+                      type="text"
+                      class="ultra-form-control"
+                      id="daoDien"
+                      required
+                      placeholder="Nhập tên đạo diễn"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="ultra-form-group">
+                    <label for="thoiLuong" class="ultra-form-label">
+                      <i class="fas fa-clock me-2"></i>Thời Lượng (phút)
+                    </label>
+                    <input
+                      type="number"
+                      class="ultra-form-control"
+                      id="thoiLuong"
+                      min="1"
+                      required
+                      placeholder="120"
+                    />
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="ultra-form-group">
+                    <label for="ngayKhoiChieu" class="ultra-form-label">
+                      <i class="fas fa-calendar me-2"></i>Ngày Khởi Chiếu
+                    </label>
+                    <input
+                      type="date"
+                      class="ultra-form-control"
+                      id="ngayKhoiChieu"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="ultra-btn ultra-btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              <i class="fas fa-times me-2"></i>Hủy
+            </button>
+            <button
+              type="button"
+              class="ultra-btn ultra-btn-primary"
+              onclick="saveMovie()"
+            >
+              <i class="fas fa-save me-2"></i>Lưu Phim
+            </button>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/sidebar.js"></script>
-    <script src="js/api.js"></script>
-</body>
+    <script src="js/phim_api.js"></script>
+  </body>
 </html>

@@ -1,205 +1,258 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quản Lý Phòng Chiếu - Cinema Manager</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="css/sidebar.css" rel="stylesheet">
-    <link href="css/styles.css" rel="stylesheet">
-</head>
-<body>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="css/sidebar.css" rel="stylesheet" />
+    <link href="css/styles.css" rel="stylesheet" />
+  </head>
+  <body>
     <!-- Sidebar will be loaded here -->
     <div id="sidebar-container"></div>
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Ultra Modern Header -->
-        <div class="ultra-header fade-in-up">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="ultra-header-title">
-                        <i class="fas fa-door-open"></i>
-                        Quản Lý Phòng Chiếu
-                    </h1>
-                    <p class="ultra-header-subtitle">Thiết kế và quản lý không gian rạp chiếu với công nghệ tiên tiến</p>
-                </div>
-                <button class="ultra-btn ultra-btn-primary" data-bs-toggle="modal" data-bs-target="#roomModal" onclick="openAddModal()">
-                    <i class="fas fa-plus me-2"></i>Thêm Phòng Chiếu
-                </button>
-            </div>
-        </div>
-
-        <!-- Modern Search Container -->
-        <div class="ultra-search-container fade-in-up" style="animation-delay: 0.1s;">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <div class="position-relative">
-                        <i class="fas fa-search position-absolute" style="left: 1.5rem; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.5); z-index: 2;"></i>
-                        <input type="text" class="ultra-search-input" id="searchInput" placeholder="Tìm kiếm phòng chiếu theo tên, loại phòng..." style="padding-left: 4rem;">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <select class="ultra-form-control" id="roomTypeFilter">
-                        <option value="">Tất cả loại phòng</option>
-                        <option value="2D">2D</option>
-                        <option value="3D">3D</option>
-                        <option value="IMAX">IMAX</option>
-                        <option value="4DX">4DX</option>
-                        <option value="VIP">VIP</option>
-                        <option value="Premium">Premium</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <div class="ultra-view-toggle">
-                        <button class="ultra-btn active" id="tableViewBtn" onclick="switchView('table')">
-                            <i class="fas fa-table me-2"></i>Bảng
-                        </button>
-                        <button class="ultra-btn" id="cardViewBtn" onclick="switchView('card')">
-                            <i class="fas fa-th-large me-2"></i>Thẻ
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Stats Grid -->
-        <div class="stats-grid fade-in-up" style="animation-delay: 0.2s;">
-            <div class="ultra-stat-card">
-                <div class="ultra-stat-number" id="totalRoomsCount">0</div>
-                <div class="ultra-stat-label">Tổng số phòng</div>
-                <i class="fas fa-door-open ultra-stat-icon"></i>
-            </div>
-            <div class="ultra-stat-card">
-                <div class="ultra-stat-number" id="totalSeatsCount">0</div>
-                <div class="ultra-stat-label">Tổng số ghế</div>
-                <i class="fas fa-chair ultra-stat-icon"></i>
-            </div>
-            <div class="ultra-stat-card">
-                <div class="ultra-stat-number" id="avgSeatsCount">0</div>
-                <div class="ultra-stat-label">Số ghế TB/phòng</div>
-                <i class="fas fa-chart-bar ultra-stat-icon"></i>
-            </div>
-            <div class="ultra-stat-card">
-                <div class="ultra-stat-number" id="roomTypesCount">0</div>
-                <div class="ultra-stat-label">Loại phòng khác nhau</div>
-                <i class="fas fa-cogs ultra-stat-icon"></i>
-            </div>
-        </div>
-
-        <!-- Table View -->
-        <div id="tableView" class="ultra-table-container fade-in-up" style="animation-delay: 0.3s;">
-            <table class="ultra-table">
-                <thead>
-                    <tr>
-                        <th>Visual</th>
-                        <th>Thông tin phòng</th>
-                        <th>Loại phòng</th>
-                        <th>Số ghế</th>
-                        <th>Trạng thái</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody id="roomsTableBody">
-                    <!-- Rooms will be loaded here -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Card View -->
-        <div id="cardView" class="ultra-grid" style="display: none;">
-            <!-- Room cards will be loaded here -->
-        </div>
-
-        <!-- Empty State -->
-        <div id="emptyState" class="ultra-empty-state" style="display: none;">
-            <div class="ultra-empty-icon">
-                <i class="fas fa-door-open"></i>
-            </div>
-            <h3 class="ultra-empty-title">Chưa có phòng chiếu nào</h3>
-            <p class="ultra-empty-description">
-                Hãy tạo phòng chiếu đầu tiên để bắt đầu xây dựng rạp phim của bạn. 
-                Thiết kế không gian giải trí hoàn hảo với công nghệ hiện đại.
+      <!-- Ultra Modern Header -->
+      <div class="ultra-header fade-in-up">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h1 class="ultra-header-title">
+              <i class="fas fa-door-open"></i>
+              Quản Lý Phòng Chiếu
+            </h1>
+            <p class="ultra-header-subtitle">
+              Thiết kế và quản lý không gian rạp chiếu với công nghệ tiên tiến
             </p>
-            <button class="ultra-btn ultra-btn-primary" data-bs-toggle="modal" data-bs-target="#roomModal" onclick="openAddModal()">
-                <i class="fas fa-plus me-2"></i>Tạo Phòng Đầu Tiên
-            </button>
+          </div>
+          <button
+            class="ultra-btn ultra-btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#roomModal"
+            onclick="openAddModal()"
+          >
+            <i class="fas fa-plus me-2"></i>Thêm Phòng Chiếu
+          </button>
         </div>
+      </div>
 
-        <!-- Loading State -->
-        <div id="loadingState" class="ultra-loading" style="display: none;">
-            <div class="ultra-spinner"></div>
+      <!-- Modern Search Container -->
+      <div
+        class="ultra-search-container fade-in-up"
+        style="animation-delay: 0.1s"
+      >
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <div class="position-relative">
+              <i
+                class="fas fa-search position-absolute"
+                style="
+                  left: 1.5rem;
+                  top: 50%;
+                  transform: translateY(-50%);
+                  color: rgba(255, 255, 255, 0.5);
+                  z-index: 2;
+                "
+              ></i>
+              <input
+                type="text"
+                class="ultra-search-input"
+                id="searchInput"
+                placeholder="Tìm kiếm phòng chiếu theo tên, loại phòng..."
+                style="padding-left: 4rem"
+              />
+            </div>
+          </div>
+          <div class="col-md-3">
+            <select class="ultra-form-control" id="roomTypeFilter">
+              <option value="">Tất cả loại phòng</option>
+              <option value="2D">2D</option>
+              <option value="3D">3D</option>
+              <option value="IMAX">IMAX</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <div class="ultra-view-toggle">
+              <button
+                class="ultra-btn active"
+                id="tableViewBtn"
+                onclick="switchView('table')"
+              >
+                <i class="fas fa-table me-2"></i>Bảng
+              </button>
+              <button
+                class="ultra-btn"
+                id="cardViewBtn"
+                onclick="switchView('card')"
+              >
+                <i class="fas fa-th-large me-2"></i>Thẻ
+              </button>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid fade-in-up" style="animation-delay: 0.2s">
+        <div class="ultra-stat-card">
+          <div class="ultra-stat-number" id="totalRoomsCount">0</div>
+          <div class="ultra-stat-label">Tổng số phòng</div>
+          <i class="fas fa-door-open ultra-stat-icon"></i>
+        </div>
+        <div class="ultra-stat-card">
+          <div class="ultra-stat-number" id="totalSeatsCount">0</div>
+          <div class="ultra-stat-label">Tổng số ghế</div>
+          <i class="fas fa-chair ultra-stat-icon"></i>
+        </div>
+        <div class="ultra-stat-card">
+          <div class="ultra-stat-number" id="avgSeatsCount">0</div>
+          <div class="ultra-stat-label">Số ghế TB/phòng</div>
+          <i class="fas fa-chart-bar ultra-stat-icon"></i>
+        </div>
+        <div class="ultra-stat-card">
+          <div class="ultra-stat-number" id="roomTypesCount">0</div>
+          <div class="ultra-stat-label">Loại phòng khác nhau</div>
+          <i class="fas fa-cogs ultra-stat-icon"></i>
+        </div>
+      </div>
+
+      <!-- Table View -->
+      <div
+        id="tableView"
+        class="ultra-table-container fade-in-up"
+        style="animation-delay: 0.3s"
+      >
+        <table class="ultra-table">
+          <thead>
+            <tr>
+              <th>Visual</th>
+              <th>Thông tin phòng</th>
+              <th>Loại phòng</th>
+              <th>Số ghế</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="roomsTableBody">
+            <!-- Rooms will be loaded here -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Card View -->
+      <div id="cardView" class="ultra-grid" style="display: none">
+        <!-- Room cards will be loaded here -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="emptyState" class="ultra-empty-state" style="display: none">
+        <div class="ultra-empty-icon">
+          <i class="fas fa-door-open"></i>
+        </div>
+        <h3 class="ultra-empty-title">Chưa có phòng chiếu nào</h3>
+        <p class="ultra-empty-description">
+          Hãy tạo phòng chiếu đầu tiên để bắt đầu xây dựng rạp phim của bạn.
+          Thiết kế không gian giải trí hoàn hảo với công nghệ hiện đại.
+        </p>
+        <button
+          class="ultra-btn ultra-btn-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#roomModal"
+          onclick="openAddModal()"
+        >
+          <i class="fas fa-plus me-2"></i>Tạo Phòng Đầu Tiên
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      <div id="loadingState" class="ultra-loading" style="display: none">
+        <div class="ultra-spinner"></div>
+      </div>
     </div>
 
     <!-- Floating Action Button -->
-    <button class="fab" data-bs-toggle="modal" data-bs-target="#roomModal" onclick="openAddModal()">
-        <i class="fas fa-plus"></i>
+    <button
+      class="fab"
+      data-bs-toggle="modal"
+      data-bs-target="#roomModal"
+      onclick="openAddModal()"
+    >
+      <i class="fas fa-plus"></i>
     </button>
 
     <!-- Ultra Modern Room Modal -->
     <div class="modal fade ultra-modal" id="roomModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="roomModalTitle">
-                        <i class="fas fa-plus-circle me-3"></i>Thêm Phòng Chiếu Mới
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="roomForm">
-                        <input type="hidden" id="roomId">
-                        <div class="ultra-form-group">
-                            <label for="tenPhong" class="ultra-form-label">
-                                <i class="fas fa-door-open me-2"></i>Tên Phòng
-                            </label>
-                            <input type="text" class="ultra-form-control" id="tenPhong" required placeholder="VD: Phòng A1, Phòng VIP 1">
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="ultra-form-group">
-                                    <label for="soGhe" class="ultra-form-label">
-                                        <i class="fas fa-chair me-2"></i>Số Ghế
-                                    </label>
-                                    <input type="number" class="ultra-form-control" id="soGhe" min="1" required placeholder="120">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="ultra-form-group">
-                                    <label for="loaiPhong" class="ultra-form-label">
-                                        <i class="fas fa-cog me-2"></i>Loại Phòng
-                                    </label>
-                                    <select class="ultra-form-control" id="loaiPhong" required>
-                                        <option value="">Chọn loại phòng</option>
-                                        <option value="2D">2D - Phòng chiếu thường</option>
-                                        <option value="3D">3D - Phòng chiếu 3D</option>
-                                        <option value="IMAX">IMAX - Màn hình lớn</option>
-                                        <option value="4DX">4DX - Trải nghiệm 4D</option>
-                                        <option value="VIP">VIP - Phòng VIP</option>
-                                        <option value="Premium">Premium - Phòng cao cấp</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="ultra-btn ultra-btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>Hủy
-                    </button>
-                    <button type="button" class="ultra-btn ultra-btn-primary" onclick="saveRoom()">
-                        <i class="fas fa-save me-2"></i>Lưu Phòng
-                    </button>
-                </div>
-            </div>
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="roomModalTitle">
+              <i class="fas fa-plus-circle me-3"></i>Thêm Phòng Chiếu Mới
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="roomForm">
+              <input type="hidden" id="roomId" />
+              <div class="ultra-form-group">
+                <label for="tenPhong" class="ultra-form-label">
+                  <i class="fas fa-door-open me-2"></i>Tên Phòng
+                </label>
+                <input
+                  type="text"
+                  class="ultra-form-control"
+                  id="tenPhong"
+                  required
+                  placeholder="VD: Phòng A1, Phòng VIP 1"
+                />
+              </div>
+              <div class="ultra-form-group">
+                <label for="loaiPhong" class="ultra-form-label">
+                  <i class="fas fa-cog me-2"></i>Loại Phòng
+                </label>
+                <select class="ultra-form-control" id="loaiPhong" required>
+                  <option value="">Chọn loại phòng</option>
+                  <option value="2D">2D - Phòng chiếu thường</option>
+                  <option value="3D">3D - Phòng chiếu 3D</option>
+                  <option value="IMAX">IMAX - Màn hình lớn</option>
+                </select>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="ultra-btn ultra-btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              <i class="fas fa-times me-2"></i>Hủy
+            </button>
+            <button
+              type="button"
+              class="ultra-btn ultra-btn-primary"
+              onclick="saveRoom()"
+            >
+              <i class="fas fa-save me-2"></i>Lưu Phòng
+            </button>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/sidebar.js"></script>
-    <script src="js/api.js"></script>
-</body>
+    <script src="js/phongchieu_api.js"></script>
+  </body>
 </html>

@@ -49,7 +49,6 @@ def get_phongchieu_by_id(ma_phong):
 def add_phongchieu():
     data = request.get_json()
     ten_phong = data.get('TenPhong')
-    so_ghe = data.get('SoGhe')
     loai_phong = data.get('LoaiPhong')
 
     conn = None
@@ -58,10 +57,10 @@ def add_phongchieu():
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO PhongChieu (TenPhong, SoGhe, LoaiPhong)
-            VALUES (%s, %s, %s)
-        """, (ten_phong, so_ghe, loai_phong))
-        
+            INSERT INTO PhongChieu (TenPhong, LoaiPhong)
+            VALUES (%s, %s)
+        """, (ten_phong, loai_phong))
+    
         # Lấy ID của phòng chiếu vừa được thêm
         ma_phong_moi = cursor.lastrowid
         conn.commit()
@@ -69,9 +68,12 @@ def add_phongchieu():
         # Lấy thông tin phòng chiếu vừa được thêm
         cursor.execute("SELECT * FROM PhongChieu WHERE MaPhong = %s", (ma_phong_moi,))
         phongchieu_moi = cursor.fetchone()
+
+        if not phongchieu_moi:
+            return jsonify({"message": "Không tìm thấy phòng chiếu vừa thêm"}), 404
         
         # Chuyển đổi tuple thành dictionary
-        columns = ['MaPhong', 'TenPhong', 'SoGhe', 'LoaiPhong']
+        columns = ['MaPhong', 'TenPhong', 'LoaiPhong']
         phongchieu_dict = dict(zip(columns, phongchieu_moi))
         
         return jsonify({
@@ -112,7 +114,6 @@ def update_phongchieu(ma_phong):
         # Chỉ cập nhật những trường có trong request data
         field_mapping = {
             'TenPhong': 'TenPhong',
-            'SoGhe': 'SoGhe',
             'LoaiPhong': 'LoaiPhong'
         }
         

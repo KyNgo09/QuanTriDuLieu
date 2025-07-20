@@ -4,7 +4,7 @@ from app.routes import phim_bp, phongchieu_bp, suatchieu_bp, ghe_bp, combo_bp, k
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)  # Enable CORS for all routes
+    CORS(app)
     
     app.register_blueprint(phim_bp, url_prefix='/api/phim')  # Register phim blueprint with a URL prefix
     app.register_blueprint(phongchieu_bp, url_prefix='/api/phongchieu')  # Register phongchieu blueprint with a URL prefix

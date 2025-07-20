@@ -1,194 +1,267 @@
 <!DOCTYPE html>
 <html lang="vi">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quản Lý Combo - Cinema Manager</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="css/sidebar.css" rel="stylesheet">
-    <link href="css/styles.css" rel="stylesheet">
-</head>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="css/sidebar.css" rel="stylesheet" />
+    <link href="css/styles.css" rel="stylesheet" />
+  </head>
 
-<body>
+  <body>
     <!-- Sidebar will be loaded here -->
     <div id="sidebar-container"></div>
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Ultra Modern Header -->
-        <div class="ultra-header fade-in-up">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="ultra-header-title">
-                        <i class="fas fa-utensils"></i>
-                        Quản Lý Combo
-                    </h1>
-                    <p class="ultra-header-subtitle">Quản lý các combo thực phẩm và đồ uống với giao diện hiện đại</p>
-                </div>
-                <button class="ultra-btn ultra-btn-primary" data-bs-toggle="modal" data-bs-target="#comboModal"
-                    onclick="openAddComboModal()">
-                    <i class="fas fa-plus me-2"></i>Thêm Combo Mới
-                </button>
-            </div>
-        </div>
-
-        <!-- Modern Search Container -->
-        <div class="ultra-search-container fade-in-up" style="animation-delay: 0.1s;">
-            <div class="row align-items-center">
-                <div class="col-md-9">
-                    <div class="position-relative">
-                        <i class="fas fa-search position-absolute"
-                            style="left: 1.5rem; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.5); z-index: 2;"></i>
-                        <input type="text" class="ultra-search-input" id="searchInput"
-                            placeholder="Tìm kiếm combo theo tên hoặc mô tả...">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="ultra-view-toggle">
-                        <button class="ultra-btn active" id="tableViewBtn" onclick="switchView('table')">
-                            <i class="fas fa-table me-2"></i>Bảng
-                        </button>
-                        <button class="ultra-btn" id="cardViewBtn" onclick="switchView('card')">
-                            <i class="fas fa-th-large me-2"></i>Thẻ
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Stats Grid -->
-        <div class="stats-grid fade-in-up" style="animation-delay: 0.2s;">
-            <div class="ultra-stat-card">
-                <div class="ultra-stat-number" id="totalCombosCount">0</div>
-                <div class="ultra-stat-label">Tổng số combo</div>
-                <i class="fas fa-utensils ultra-stat-icon"></i>
-            </div>
-            <div class="ultra-stat-card">
-                <div class="ultra-stat-number" id="avgPrice">0</div>
-                <div class="ultra-stat-label">Giá trung bình (VND)</div>
-                <i class="fas fa-money-bill ultra-stat-icon"></i>
-            </div>
-            <div class="ultra-stat-card">
-                <div class="ultra-stat-number" id="comboTypesCount">0</div>
-                <div class="ultra-stat-label">Loại combo khác nhau</div>
-                <i class="fas fa-tags ultra-stat-icon"></i>
-            </div>
-        </div>
-        
-        <!-- Table View -->
-        <div id="tableView" class="ultra-table-container fade-in-up" style="animation-delay: 0.3s;">
-            <table class="ultra-table">
-                <thead>
-                    <tr>
-                        <th>Visual</th>
-                        <th>Thông tin combo</th>
-                        <th>Giá (VND)</th>
-                        <th>Mô tả</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody id="combosTableBody">
-                    <!-- Combos will be loaded here -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Card View -->
-        <div id="cardView" class="ultra-grid" style="display: none;">
-            <!-- Combo cards will be loaded here -->
-        </div>
-
-        <!-- Empty State -->
-        <div id="emptyState" class="ultra-empty-state" style="display: none;">
-            <div class="ultra-empty-icon">
-                <i class="fas fa-utensils"></i>
-            </div>
-            <h3 class="ultra-empty-title">Chưa có combo nào</h3>
-            <p class="ultra-empty-description">
-                Hãy thêm combo đầu tiên để bắt đầu quản lý thực phẩm và đồ uống của rạp.
-                Tạo trải nghiệm tuyệt vời cho khách hàng!
+      <!-- Ultra Modern Header -->
+      <div class="ultra-header fade-in-up">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h1 class="ultra-header-title">
+              <i class="fas fa-utensils"></i>
+              Quản Lý Combo
+            </h1>
+            <p class="ultra-header-subtitle">
+              Quản lý các combo thực phẩm và đồ uống với giao diện hiện đại
             </p>
-            <button class="ultra-btn ultra-btn-primary" data-bs-toggle="modal" data-bs-target="#comboModal"
-                onclick="openAddComboModal()">
-                <i class="fas fa-plus me-2"></i>Thêm Combo Đầu Tiên
-            </button>
+          </div>
+          <button
+            class="ultra-btn ultra-btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#comboModal"
+            onclick="openAddComboModal()"
+          >
+            <i class="fas fa-plus me-2"></i>Thêm Combo Mới
+          </button>
         </div>
+      </div>
 
-        <!-- Loading State -->
-        <div id="loadingState" class="ultra-loading" style="display: none;">
-            <div class="ultra-spinner"></div>
+      <!-- Modern Search Container -->
+      <div
+        class="ultra-search-container fade-in-up"
+        style="animation-delay: 0.1s"
+      >
+        <div class="row align-items-center">
+          <div class="col-md-9">
+            <div class="position-relative">
+              <i
+                class="fas fa-search position-absolute"
+                style="
+                  left: 1.5rem;
+                  top: 50%;
+                  transform: translateY(-50%);
+                  color: rgba(255, 255, 255, 0.5);
+                  z-index: 2;
+                "
+              ></i>
+              <input
+                type="text"
+                class="ultra-search-input"
+                id="searchInput"
+                placeholder="Tìm kiếm combo theo tên hoặc mô tả..."
+              />
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="ultra-view-toggle">
+              <button
+                class="ultra-btn active"
+                id="tableViewBtn"
+                onclick="switchView('table')"
+              >
+                <i class="fas fa-table me-2"></i>Bảng
+              </button>
+              <button
+                class="ultra-btn"
+                id="cardViewBtn"
+                onclick="switchView('card')"
+              >
+                <i class="fas fa-th-large me-2"></i>Thẻ
+              </button>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid fade-in-up" style="animation-delay: 0.2s">
+        <div class="ultra-stat-card">
+          <div class="ultra-stat-number" id="totalCombosCount">0</div>
+          <div class="ultra-stat-label">Tổng số combo</div>
+          <i class="fas fa-utensils ultra-stat-icon"></i>
+        </div>
+        <div class="ultra-stat-card">
+          <div class="ultra-stat-number" id="avgPrice">0</div>
+          <div class="ultra-stat-label">Giá trung bình (VND)</div>
+          <i class="fas fa-money-bill ultra-stat-icon"></i>
+        </div>
+        <div class="ultra-stat-card">
+          <div class="ultra-stat-number" id="comboTypesCount">0</div>
+          <div class="ultra-stat-label">Loại combo khác nhau</div>
+          <i class="fas fa-tags ultra-stat-icon"></i>
+        </div>
+      </div>
+
+      <!-- Table View -->
+      <div
+        id="tableView"
+        class="ultra-table-container fade-in-up"
+        style="animation-delay: 0.3s"
+      >
+        <table class="ultra-table">
+          <thead>
+            <tr>
+              <th>Visual</th>
+              <th>Thông tin combo</th>
+              <th>Giá (VND)</th>
+              <th>Mô tả</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="combosTableBody">
+            <!-- Combos will be loaded here -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Card View -->
+      <div id="cardView" class="ultra-grid" style="display: none">
+        <!-- Combo cards will be loaded here -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="emptyState" class="ultra-empty-state" style="display: none">
+        <div class="ultra-empty-icon">
+          <i class="fas fa-utensils"></i>
+        </div>
+        <h3 class="ultra-empty-title">Chưa có combo nào</h3>
+        <p class="ultra-empty-description">
+          Hãy thêm combo đầu tiên để bắt đầu quản lý thực phẩm và đồ uống của
+          rạp. Tạo trải nghiệm tuyệt vời cho khách hàng!
+        </p>
+        <button
+          class="ultra-btn ultra-btn-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#comboModal"
+          onclick="openAddComboModal()"
+        >
+          <i class="fas fa-plus me-2"></i>Thêm Combo Đầu Tiên
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      <div id="loadingState" class="ultra-loading" style="display: none">
+        <div class="ultra-spinner"></div>
+      </div>
     </div>
 
     <!-- Floating Action Button -->
-    <button class="fab" data-bs-toggle="modal" data-bs-target="#comboModal" onclick="openAddComboModal()">
-        <i class="fas fa-plus"></i>
+    <button
+      class="fab"
+      data-bs-toggle="modal"
+      data-bs-target="#comboModal"
+      onclick="openAddComboModal()"
+    >
+      <i class="fas fa-plus"></i>
     </button>
 
     <!-- Ultra Modern Combo Modal -->
     <div class="modal fade ultra-modal" id="comboModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="comboModalTitle">
-                        <i class="fas fa-plus-circle me-3"></i>Thêm Combo Mới
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="comboModalTitle">
+              <i class="fas fa-plus-circle me-3"></i>Thêm Combo Mới
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="comboForm">
+              <input type="hidden" id="comboId" />
+              <div class="row">
+                <div class="col-md-8">
+                  <div class="ultra-form-group">
+                    <label for="tenCombo" class="ultra-form-label">
+                      <i class="fas fa-utensils me-2"></i>Tên Combo
+                    </label>
+                    <input
+                      type="text"
+                      class="ultra-form-control"
+                      id="tenCombo"
+                      required
+                      placeholder="Nhập tên combo"
+                    />
+                  </div>
                 </div>
-                <div class="modal-body">
-                    <form id="comboForm">
-                        <input type="hidden" id="comboId">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div class="ultra-form-group">
-                                    <label for="tenCombo" class="ultra-form-label">
-                                        <i class="fas fa-utensils me-2"></i>Tên Combo
-                                    </label>
-                                    <input type="text" class="ultra-form-control" id="tenCombo" required
-                                        placeholder="Nhập tên combo">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="ultra-form-group">
-                                    <label for="giaCombo" class="ultra-form-label">
-                                        <i class="fas fa-money-bill me-2"></i>Giá (VND)
-                                    </label>
-                                    <input type="number" class="ultra-form-control" id="giaCombo" min="1000" required
-                                        placeholder="100000">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="ultra-form-group">
-                                    <label for="moTa" class="ultra-form-label">
-                                        <i class="fas fa-info-circle me-2"></i>Mô Tả
-                                    </label>
-                                    <textarea class="ultra-form-control" id="moTa" rows="4"
-                                        placeholder="Mô tả combo (VD: Bắp rang bơ + Coca)"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
+                <div class="col-md-4">
+                  <div class="ultra-form-group">
+                    <label for="giaCombo" class="ultra-form-label">
+                      <i class="fas fa-money-bill me-2"></i>Giá (VND)
+                    </label>
+                    <input
+                      type="number"
+                      class="ultra-form-control"
+                      id="giaCombo"
+                      min="1000"
+                      required
+                      placeholder="100000"
+                    />
+                  </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="ultra-btn ultra-btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>Hủy
-                    </button>
-                    <button type="button" class="ultra-btn ultra-btn-primary" onclick="saveCombo()">
-                        <i class="fas fa-save me-2"></i>Lưu Combo
-                    </button>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="ultra-form-group">
+                    <label for="moTa" class="ultra-form-label">
+                      <i class="fas fa-info-circle me-2"></i>Mô Tả
+                    </label>
+                    <textarea
+                      class="ultra-form-control"
+                      id="moTa"
+                      rows="4"
+                      placeholder="Mô tả combo (VD: Bắp rang bơ + Coca)"
+                    ></textarea>
+                  </div>
                 </div>
-            </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="ultra-btn ultra-btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              <i class="fas fa-times me-2"></i>Hủy
+            </button>
+            <button
+              type="button"
+              class="ultra-btn ultra-btn-primary"
+              onclick="saveCombo()"
+            >
+              <i class="fas fa-save me-2"></i>Lưu Combo
+            </button>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/sidebar.js"></script>
     <script src="js/combo_api.js"></script>
-</body>
-
+  </body>
 </html>

@@ -1,8 +1,64 @@
 from flask import Blueprint, jsonify, request
 from app.models.db import get_connection
 from app.utils import convert_datetime_fields
+from datetime import datetime
 
 suatchieu_bp = Blueprint('suatchieu', __name__)
+
+# Helper function to get raw phim data
+def get_phim_data_by_id(ma_phim):
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Phim WHERE MaPhim = %s", (ma_phim,))
+        return cursor.fetchone()
+    except Exception:
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+# Helper function to get raw phongchieu data
+def get_phongchieu_data_by_id(ma_phong):
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM PhongChieu WHERE MaPhong = %s", (ma_phong,))
+        return cursor.fetchone()
+    except Exception:
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+def get_so_luong_ve_da_ban(ma_suatchieu):
+    """
+    Lấy số lượng vé đã bán cho một suất chiếu
+    """
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT COUNT(*) FROM Ve WHERE MaSuatChieu = %s
+        """, (ma_suatchieu,))
+        return cursor.fetchone()[0]
+    except Exception as e:
+        return 0
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 # Lấy danh sách suất chiếu
 @suatchieu_bp.route('/', methods=['GET'])
@@ -17,11 +73,120 @@ def get_suatchieu():
             FROM SuatChieu
         """)
         data = cursor.fetchall()
+
+        # Chuyển đổi các kiểu dữ liệu datetime
+        convert_datetime_fields(data)
+    
+        for item in data:
+            item['Phim'] = get_phim_data_by_id(item['MaPhim'])
+            item['Phong'] = get_phongchieu_data_by_id(item['MaPhong'])
+            item['SoLuongVeDaBan'] = get_so_luong_ve_da_ban(item['MaSuatChieu'])
+            item.pop('MaPhim', None)
+            item.pop('MaPhong', None)
+
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"message": "Lỗi khi lấy danh sách suất chiếu", "error": str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+# Lấy danh sách suất chiếu với filter
+@suatchieu_bp.route('/filter', methods=['GET'])
+def get_suatchieu_with_filter():
+    conn = None
+    cursor = None
+    try:
+        # Lấy các tham số filter từ query string
+        ten_phim = request.args.get('ten_phim', '').strip()
+        ma_phong = request.args.get('ma_phong')
+        ngay_chieu = request.args.get('ngay_chieu')
+        gio_chieu_tu = request.args.get('gio_chieu_tu')
+        gio_chieu_den = request.args.get('gio_chieu_den')
+        
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Xây dựng câu query với JOIN để có thể filter theo tên phim
+        base_query = """
+            SELECT s.*, p.TenPhim, pc.TenPhong
+            FROM SuatChieu s
+            LEFT JOIN Phim p ON s.MaPhim = p.MaPhim
+            LEFT JOIN PhongChieu pc ON s.MaPhong = pc.MaPhong
+            WHERE 1=1
+        """
+        
+        params = []
+        
+        # Thêm các điều kiện filter
+        if ten_phim:
+            base_query += " AND p.TenPhim LIKE %s"
+            params.append(f"%{ten_phim}%")
+            
+        if ma_phong:
+            try:
+                ma_phong_int = int(ma_phong)
+                base_query += " AND s.MaPhong = %s"
+                params.append(ma_phong_int)
+            except ValueError:
+                return jsonify({"message": "Mã phòng không hợp lệ"}), 400
+                
+        if ngay_chieu:
+            try:
+                # Kiểm tra định dạng ngày
+                datetime.strptime(ngay_chieu, "%Y-%m-%d")
+                base_query += " AND s.NgayChieu = %s"
+                params.append(ngay_chieu)
+            except ValueError:
+                return jsonify({"message": "Định dạng ngày không hợp lệ, yêu cầu YYYY-MM-DD"}), 400
+                
+        if gio_chieu_tu:
+            try:
+                # Kiểm tra định dạng giờ
+                datetime.strptime(gio_chieu_tu, "%H:%M:%S")
+                base_query += " AND s.GioChieu >= %s"
+                params.append(gio_chieu_tu)
+            except ValueError:
+                return jsonify({"message": "Định dạng giờ bắt đầu không hợp lệ, yêu cầu HH:MM:SS"}), 400
+                
+        if gio_chieu_den:
+            try:
+                # Kiểm tra định dạng giờ
+                datetime.strptime(gio_chieu_den, "%H:%M:%S")
+                base_query += " AND s.GioChieu <= %s"
+                params.append(gio_chieu_den)
+            except ValueError:
+                return jsonify({"message": "Định dạng giờ kết thúc không hợp lệ, yêu cầu HH:MM:SS"}), 400
+                
+        
+        # Sắp xếp theo ngày chiếu và giờ chiếu
+        base_query += " ORDER BY s.NgayChieu DESC, s.GioChieu ASC"
+        
+        cursor.execute(base_query, params)
+        data = cursor.fetchall()
         
         # Chuyển đổi các kiểu dữ liệu datetime
         convert_datetime_fields(data)
         
-        return jsonify(data)
+        # Thêm thông tin chi tiết cho mỗi suất chiếu
+        for item in data:
+            item['Phim'] = get_phim_data_by_id(item['MaPhim'])
+            item['Phong'] = get_phongchieu_data_by_id(item['MaPhong'])
+            item['SoLuongVeDaBan'] = get_so_luong_ve_da_ban(item['MaSuatChieu'])
+            # Xóa các trường trung lặp
+            item.pop('MaPhim', None)
+            item.pop('MaPhong', None)
+            item.pop('TenPhim', None)
+            item.pop('TenPhong', None)
+        
+        return jsonify({
+            "message": "Lấy danh sách suất chiếu thành công",
+            "total": len(data),
+            "data": data
+        })
+        
     except Exception as e:
         return jsonify({"message": "Lỗi khi lấy danh sách suất chiếu", "error": str(e)}), 500
     finally:
@@ -48,6 +213,12 @@ def get_suatchieu_by_id(ma_suatchieu):
         if data:
             # Chuyển đổi các kiểu dữ liệu datetime
             convert_datetime_fields(data)
+
+            data['Phim'] = get_phim_data_by_id(data['MaPhim'])
+            data['Phong'] = get_phongchieu_data_by_id(data['MaPhong'])
+            data['SoLuongVeDaBan'] = get_so_luong_ve_da_ban(data['MaSuatChieu'])
+            data.pop('MaPhim', None)
+            data.pop('MaPhong', None)
             return jsonify(data)
         else:
             return jsonify({"message": "SuatChieu không tồn tại"}), 404
@@ -73,7 +244,7 @@ def create_suatchieu():
     cursor = None
     try:
         conn = get_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
         cursor.execute("""
             INSERT INTO SuatChieu (MaPhim, MaPhong, NgayChieu, GioChieu, GiaVe)
             VALUES (%s, %s, %s, %s, %s)
@@ -87,16 +258,12 @@ def create_suatchieu():
         cursor.execute("SELECT * FROM SuatChieu WHERE MaSuatChieu = %s", (ma_suatchieu_moi,))
         suatchieu_moi = cursor.fetchone()
         
-        # Chuyển đổi tuple thành dictionary
-        columns = ['MaSuatChieu', 'MaPhim', 'MaPhong', 'NgayChieu', 'GioChieu', 'GiaVe']
-        suatchieu_dict = dict(zip(columns, suatchieu_moi))
-        
         # Chuyển đổi các kiểu dữ liệu datetime
-        convert_datetime_fields(suatchieu_dict)
+        convert_datetime_fields(suatchieu_moi)
         
         return jsonify({
             "message": "Thêm suất chiếu thành công",
-            "data": suatchieu_dict
+            "data": suatchieu_moi
         }), 201
     except Exception as e:
         if conn:

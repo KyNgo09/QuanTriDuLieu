@@ -46,37 +46,6 @@ INSERT INTO `combo` VALUES (1,'Bắp + Nước 1 người',45000.00,'1 bắp ng�
 UNLOCK TABLES;
 
 --
--- Table structure for table `ghe`
---
-
-DROP TABLE IF EXISTS `ghe`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `ghe` (
-  `MaGhe` int NOT NULL AUTO_INCREMENT,
-  `MaPhong` int DEFAULT NULL,
-  `SoHang` char(1) DEFAULT NULL,
-  `STTGhe` int DEFAULT NULL,
-  `LoaiGhe` enum('THUONG','VIP') DEFAULT NULL,
-  PRIMARY KEY (`MaGhe`),
-  UNIQUE KEY `unique_phong_sohang_sttghe` (`MaPhong`, `SoHang`, `STTGhe`),
-  KEY `MaPhong` (`MaPhong`),
-  CONSTRAINT `ghe_ibfk_1` FOREIGN KEY (`MaPhong`) REFERENCES `phongchieu` (`MaPhong`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
-
---
--- Dumping data for table `ghe`
---
-
-LOCK TABLES `ghe` WRITE;
-/*!40000 ALTER TABLE `ghe` DISABLE KEYS */;
-INSERT INTO `ghe` VALUES (1,1,'A',1,'THUONG'),(2,1,'A',2,'THUONG'),(3,1,'A',3,'THUONG'),(4,1,'A',4,'VIP'),(5,1,'A',5,'VIP'),(6,1,'A',6,'VIP'),(7,2,'A',1,'THUONG'),(8,2,'A',2,'THUONG'),(9,2,'A',3,'THUONG'),(10,2,'A',4,'VIP'),(11,2,'A',5,'VIP'),(12,2,'A',6,'VIP');
-/*!40000 ALTER TABLE `ghe` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `hoadon`
 --
 
@@ -86,17 +55,14 @@ DROP TABLE IF EXISTS `hoadon`;
 CREATE TABLE `hoadon` (
   `MaHoaDon` int NOT NULL AUTO_INCREMENT,
   `MaKH` int DEFAULT NULL,
-  `MaVe` int DEFAULT NULL,
   `MaCombo` int DEFAULT NULL,
-  `SoLuong` int DEFAULT NULL,
+  `SoLuong` int DEFAULT 1,
   `NgayMua` datetime DEFAULT CURRENT_TIMESTAMP,
   `TongTien` decimal(10,2) DEFAULT NULL,
   PRIMARY KEY (`MaHoaDon`),
   KEY `MaKH` (`MaKH`),
-  KEY `MaVe` (`MaVe`),
   KEY `MaCombo` (`MaCombo`),
   CONSTRAINT `hoadon_ibfk_1` FOREIGN KEY (`MaKH`) REFERENCES `khachhang` (`MaKH`),
-  CONSTRAINT `hoadon_ibfk_2` FOREIGN KEY (`MaVe`) REFERENCES `ve` (`MaVe`),
   CONSTRAINT `hoadon_ibfk_3` FOREIGN KEY (`MaCombo`) REFERENCES `combo` (`MaCombo`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -108,7 +74,7 @@ CREATE TABLE `hoadon` (
 
 LOCK TABLES `hoadon` WRITE;
 /*!40000 ALTER TABLE `hoadon` DISABLE KEYS */;
-INSERT INTO `hoadon` VALUES (1,1,1,1,1,'2025-07-09 20:34:26',105000.00),(2,1,2,2,2,'2025-07-09 20:34:26',250000.00),(3,2,3,1,1,'2025-07-09 20:34:26',105000.00);
+INSERT INTO `hoadon` VALUES (1,1,1,1,'2025-07-09 20:34:26',105000.00),(2,1,2,2,'2025-07-09 20:34:26',250000.00),(3,2,3,1,'2025-07-09 20:34:26',105000.00);
 /*!40000 ALTER TABLE `hoadon` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -152,7 +118,7 @@ CREATE TABLE `phim` (
   `DaoDien` varchar(100) DEFAULT NULL,
   `ThoiLuong` int DEFAULT NULL,
   `NgayKhoiChieu` date DEFAULT NULL,
-  `DoTuoiChoPhep` int DEFAULT NULL,
+  `DoTuoiChoPhep` enum('P','K','T13','T16','T18') DEFAULT 'P',
   PRIMARY KEY (`MaPhim`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -163,7 +129,7 @@ CREATE TABLE `phim` (
 
 LOCK TABLES `phim` WRITE;
 /*!40000 ALTER TABLE `phim` DISABLE KEYS */;
-INSERT INTO `phim` VALUES (1,'Avengers: Endgame','Hành động','Anthony Russo',180,'2025-07-20',13),(2,'Inside Out 2','Hoạt hình','Kelsey Mann',100,'2025-06-15',6);
+INSERT INTO `phim` VALUES (1,'Avengers: Endgame','Hành động','Anthony Russo',180,'2025-07-20','T13'),(2,'Inside Out 2','Hoạt hình','Kelsey Mann',100,'2025-06-15',6);
 /*!40000 ALTER TABLE `phim` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -177,7 +143,7 @@ DROP TABLE IF EXISTS `phongchieu`;
 CREATE TABLE `phongchieu` (
   `MaPhong` int NOT NULL AUTO_INCREMENT,
   `TenPhong` varchar(50) NOT NULL,
-  `SoGhe` int DEFAULT NULL,
+  `SoGhe` int DEFAULT 0,
   `LoaiPhong` enum('2D','3D','IMAX') DEFAULT NULL,
   PRIMARY KEY (`MaPhong`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -189,8 +155,78 @@ CREATE TABLE `phongchieu` (
 
 LOCK TABLES `phongchieu` WRITE;
 /*!40000 ALTER TABLE `phongchieu` DISABLE KEYS */;
-INSERT INTO `phongchieu` VALUES (1,'Phòng 2D - A',60,'2D'),(2,'Phòng 3D - B',40,'3D');
+INSERT INTO `phongchieu` VALUES (1,'Phòng 2D - A',0,'2D'),(2,'Phòng 3D - B',0,'3D');
 /*!40000 ALTER TABLE `phongchieu` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+--
+-- Table structure for table `ghe`
+--
+
+DROP TABLE IF EXISTS `ghe`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ghe` (
+  `MaGhe` int NOT NULL AUTO_INCREMENT,
+  `MaPhong` int DEFAULT NULL,
+  `SoHang` char(1) DEFAULT NULL,
+  `STTGhe` int DEFAULT NULL,
+  `LoaiGhe` enum('THUONG','VIP') DEFAULT 'THUONG',
+  PRIMARY KEY (`MaGhe`),
+  UNIQUE KEY `unique_phong_sohang_sttghe` (`MaPhong`, `SoHang`, `STTGhe`),
+  KEY `MaPhong` (`MaPhong`),
+  CONSTRAINT `ghe_ibfk_1` FOREIGN KEY (`MaPhong`) REFERENCES `phongchieu` (`MaPhong`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Trigger tự động cập nhật số lượng ghế trong phòng chiếu khi insert ghế mới
+--
+DELIMITER $$
+CREATE TRIGGER update_so_luong_ghe_insert
+AFTER INSERT ON ghe
+FOR EACH ROW
+BEGIN
+    -- Kiểm tra mã phòng có tồn tại không
+    IF NEW.MaPhong IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'MaPhong khong duoc NULL.';
+    END IF;
+
+    UPDATE phongchieu
+    SET SoGhe = SoGhe + 1
+    WHERE MaPhong = NEW.MaPhong;
+END$$
+DELIMITER ;
+
+--
+-- Trigger tự động cập nhật số lượng ghế trong phòng chiếu khi delete ghế
+--
+DELIMITER $$
+CREATE TRIGGER update_so_luong_ghe_delete
+AFTER DELETE ON ghe
+FOR EACH ROW
+BEGIN
+    -- Kiểm tra mã phòng có tồn tại không
+    IF OLD.MaPhong IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'MaPhong khong duoc NULL.';
+    END IF;
+
+    UPDATE phongchieu
+    SET SoGhe = SoGhe - 1
+    WHERE MaPhong = OLD.MaPhong;
+END$$
+DELIMITER ;
+--
+-- Dumping data for table `ghe`
+--
+
+LOCK TABLES `ghe` WRITE;
+/*!40000 ALTER TABLE `ghe` DISABLE KEYS */;
+INSERT INTO `ghe` VALUES (1,1,'A',1,'THUONG'),(2,1,'A',2,'THUONG'),(3,1,'A',3,'THUONG'),(4,1,'A',4,'VIP'),(5,1,'A',5,'VIP'),(6,1,'A',6,'VIP'),(7,2,'A',1,'THUONG'),(8,2,'A',2,'THUONG'),(9,2,'A',3,'THUONG'),(10,2,'A',4,'VIP'),(11,2,'A',5,'VIP'),(12,2,'A',6,'VIP');
+/*!40000 ALTER TABLE `ghe` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -211,7 +247,7 @@ CREATE TABLE `suatchieu` (
   KEY `MaPhim` (`MaPhim`),
   KEY `MaPhong` (`MaPhong`),
   CONSTRAINT `suatchieu_ibfk_1` FOREIGN KEY (`MaPhim`) REFERENCES `phim` (`MaPhim`),
-  CONSTRAINT `suatchieu_ibfk_2` FOREIGN KEY (`MaPhong`) REFERENCES `phongchieu` (`MaPhong`)
+  CONSTRAINT `suatchieu_ibfk_2` FOREIGN KEY (`MaPhong`) REFERENCES `phongchieu` (`MaPhong`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -270,6 +306,24 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-07-09 20:37:05
+
+-- Cấu hình CASCADE DELETE cho bảng phongchieu
+-- Script này sẽ thực hiện thay đổi cho database đã tồn tại
+
+-- Bước 1: Xóa các constraint cũ
+ALTER TABLE `ghe` DROP FOREIGN KEY `ghe_ibfk_1`;
+ALTER TABLE `suatchieu` DROP FOREIGN KEY `suatchieu_ibfk_2`;
+
+-- Bước 2: Thêm lại constraint với CASCADE DELETE
+ALTER TABLE `ghe` 
+ADD CONSTRAINT `ghe_ibfk_1` 
+FOREIGN KEY (`MaPhong`) REFERENCES `phongchieu` (`MaPhong`) 
+ON DELETE CASCADE;
+
+ALTER TABLE `suatchieu` 
+ADD CONSTRAINT `suatchieu_ibfk_2` 
+FOREIGN KEY (`MaPhong`) REFERENCES `phongchieu` (`MaPhong`) 
+ON DELETE CASCADE;
 
 -- Trigger kiểm tra tính hợp lệ của thời gian đặt vé (trước 15p khi suat chiếu bắt đầu)
 DELIMITER $$
@@ -364,23 +418,8 @@ CREATE TRIGGER trg_tinh_tien_hoadon
 BEFORE INSERT ON hoadon
 FOR EACH ROW
 BEGIN
-    DECLARE v_GiaVe DECIMAL(10,2) DEFAULT 0;
     DECLARE v_GiaCombo DECIMAL(10,2) DEFAULT 0;
     DECLARE v_TongTien DECIMAL(10,2);
-
-    -- Lấy giá vé từ bảng ve
-    IF NEW.MaVe IS NOT NULL THEN
-        SELECT GiaVe
-        INTO v_GiaVe
-        FROM ve
-        WHERE MaVe = NEW.MaVe;
-
-        -- Nếu không tìm thấy vé → báo lỗi
-        IF v_GiaVe IS NULL THEN
-            SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = 'Khong tim thay thong tin ve.';
-        END IF;
-    END IF;
 
     -- Lấy giá combo từ bảng combo (nếu có chọn combo)
     IF NEW.MaCombo IS NOT NULL THEN
@@ -397,7 +436,7 @@ BEGIN
     END IF;
 
     -- Tính tổng tiền:
-    SET v_TongTien = v_GiaVe + (v_GiaCombo * IFNULL(NEW.SoLuong, 1));
+    SET v_TongTien = v_GiaCombo * IFNULL(NEW.SoLuong, 1);
 
     -- Gán vào NEW.TongTien
     SET NEW.TongTien = v_TongTien;
@@ -805,9 +844,3 @@ BEGIN
 END //
 
 DELIMITER ;
-
-ALTER TABLE hoadon
-DROP FOREIGN KEY hoadon_ibfk_2;
-
-ALTER TABLE hoadon
-DROP COLUMN mave;

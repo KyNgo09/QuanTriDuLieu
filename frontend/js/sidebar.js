@@ -630,8 +630,8 @@ window.sidebarManager = new SidebarManager();
 class UltraSidebarLoader {
   constructor() {
     this.containerId = "sidebar-container";
-    this.sidebarPath = "components/ultra-sidebar.html";
-    this.cssPath = "css/ultra-modern-sidebar.css";
+    this.sidebarPath = "components/sidebar.html";
+    this.cssPath = "css/sidebar.css";
     this.isLoaded = false;
     this.currentPage = "";
     this.retryCount = 0;
@@ -654,7 +654,7 @@ class UltraSidebarLoader {
   async loadCSS() {
     return new Promise((resolve, reject) => {
       // Check if CSS is already loaded
-      if (document.querySelector(`link[href*="ultra-modern-sidebar.css"]`)) {
+      if (document.querySelector(`link[href*="sidebar.css"]`)) {
         resolve();
         return;
       }

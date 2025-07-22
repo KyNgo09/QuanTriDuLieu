@@ -33,7 +33,7 @@ class SidebarManager {
       "ve.html": "ve",
       "combo.html": "combo",
       "hoadon.html": "hoadon",
-      "baocao.html": "baocao",
+      "thongke.html": "thongke",
     };
 
     // Event listeners storage
@@ -841,9 +841,9 @@ class UltraSidebarLoader {
                             </a>
                         </li>
                         <li class="ultra-nav-item" style="margin: 0.25rem 1rem;">
-                            <a href="baocao.html" class="ultra-nav-link" data-page="baocao" style="display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; color: rgba(255, 255, 255, 0.8); text-decoration: none; border-radius: 12px; transition: all 0.3s ease;">
+                            <a href="thongke.html" class="ultra-nav-link" data-page="thongke" style="display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; color: rgba(255, 255, 255, 0.8); text-decoration: none; border-radius: 12px; transition: all 0.3s ease;">
                                 <span style="width: 20px;">📊</span>
-                                <span>Báo Cáo</span>
+                                <span>Thống Kê</span>
                             </a>
                         </li>
                     </ul>
@@ -926,7 +926,7 @@ class UltraSidebarLoader {
       "ve.html": "ve",
       "combo.html": "combo",
       "hoadon.html": "hoadon",
-      "baocao.html": "baocao",
+      "thongke.html": "thongke",
     };
 
     return pageMap[fileName] || "phim";

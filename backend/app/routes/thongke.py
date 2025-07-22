@@ -118,47 +118,16 @@ def doanh_thu_theo_ngay():
 
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
-
-        query = """
-            SELECT 
-                Ngay,
-                SUM(SoVeBan) AS SoVeBan,
-                SUM(DoanhThuVe) AS DoanhThuVe,
-                SUM(SoComboBan) AS SoComboBan,
-                SUM(DoanhThuCombo) AS DoanhThuCombo,
-                SUM(DoanhThuVe) + SUM(DoanhThuCombo) AS TongDoanhThu
-            FROM (
-                -- Thống kê vé theo ngày
-                SELECT 
-                    DATE(NgayDat) AS Ngay,
-                    COUNT(*) AS SoVeBan,
-                    SUM(GiaVe) AS DoanhThuVe,
-                    0 AS SoComboBan,
-                    0 AS DoanhThuCombo
-                FROM ve
-                WHERE DATE(NgayDat) BETWEEN %s AND %s
-                GROUP BY Ngay
-
-                UNION ALL
-
-                -- Thống kê combo theo ngày
-                SELECT 
-                    DATE(NgayMua) AS Ngay,
-                    0 AS SoVeBan,
-                    0 AS DoanhThuVe,
-                    SUM(SoLuong) AS SoComboBan,
-                    SUM(SoLuong * cb.GiaCombo) AS DoanhThuCombo
-                FROM hoadon hd
-                JOIN combo cb ON hd.MaCombo = cb.MaCombo
-                WHERE DATE(NgayMua) BETWEEN %s AND %s
-                GROUP BY Ngay
-            ) AS tong
-            GROUP BY Ngay
-            ORDER BY Ngay ASC
-        """
-
-        cursor.execute(query, (start_date, end_date, start_date, end_date))
-        result = cursor.fetchall()
+    
+        cursor.callproc('sp_BaoCaoDoanhThuTheoNgay', [start_date, end_date])
+        result = []
+        for res in cursor.stored_results():
+            result.extend(res.fetchall())
+        
+        if not result:
+            return jsonify({
+                "message": "Không có dữ liệu doanh thu trong khoảng thời gian này"
+            }), 404
 
         return jsonify({
             "message": "Thống kê doanh thu mỗi ngày thành công",
@@ -177,11 +146,10 @@ def doanh_thu_theo_ngay():
         if conn:
             conn.close()
 
-
-@thongke_bp.route('/doanh-thu/phim', methods=['GET'])
+@thongke_bp.route('/doanh-thu-phim', methods=['GET'])
 def doanh_thu_theo_phim():
     """
-    API thống kê doanh thu theo từng phim
+    API thống kê doanh thu theo từng phim bằng sp_BaoCaoDoanhThuTheoPhim
     """
     conn = None
     cursor = None
@@ -190,30 +158,20 @@ def doanh_thu_theo_phim():
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("""
-            SELECT 
-                p.MaPhim,
-                p.TenPhim,
-                COUNT(DISTINCT v.MaVe) AS SoLuongVe,
-                COALESCE(SUM(hd.TongTien), 0) AS TongDoanhThu,
-                COUNT(DISTINCT sc.MaSuatChieu) AS SoSuatChieu
-            FROM Phim p
-            LEFT JOIN SuatChieu sc ON p.MaPhim = sc.MaPhim
-            LEFT JOIN Ve v ON sc.MaSuatChieu = v.MaSuatChieu
-            LEFT JOIN HoaDon hd ON v.MaVe = hd.MaVe
-            GROUP BY p.MaPhim, p.TenPhim
-            ORDER BY TongDoanhThu DESC
-        """)
-        rows = cursor.fetchall()
+        cursor.callproc('sp_BaoCaoDoanhThuTheoPhim')
 
-        if not rows:
+        result = []
+        for res in cursor.stored_results():
+            result.extend(res.fetchall())
+
+        if not result:
             return jsonify({
                 "message": "Không có dữ liệu doanh thu phim"
             }), 404
 
         return jsonify({
             "message": "Thống kê doanh thu theo phim thành công",
-            "data": rows
+            "data": result
         }), 200
 
     except Exception as e:

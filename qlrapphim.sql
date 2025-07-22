@@ -645,50 +645,62 @@ DELIMITER ;
 -- Mục đích: Thống kê doanh thu hàng ngày
 DELIMITER //
 
-CREATE PROCEDURE sp_BaoCaoDoanhThuTheoNgay(
+CREATE PROCEDURE sp_BaoCaoDoanhThuTheoNgay (
     IN p_NgayBatDau DATE,
     IN p_NgayKetThuc DATE
 )
 BEGIN
     SELECT 
-        DATE(h.NgayMua) AS NgayBan,
-        SUM(h.TongTien) AS TongDoanhThu,
-        COUNT(DISTINCT h.MaHoaDon) AS SoHoaDon,
-        COUNT(DISTINCT h.MaVe) AS SoVeBan,
-        AVG(h.TongTien) AS DoanhThuTrungBinh
-    FROM hoadon h
-    WHERE DATE(h.NgayMua) BETWEEN p_NgayBatDau AND p_NgayKetThuc
-    GROUP BY DATE(h.NgayMua)
-    ORDER BY DATE(h.NgayMua) DESC;
+        Ngay,
+        SUM(DoanhThuVe) AS DoanhThuVe,
+        SUM(DoanhThuCombo) AS DoanhThuCombo,
+        SUM(DoanhThuVe + DoanhThuCombo) AS TongDoanhThu
+    FROM (
+        -- Doanh thu vé theo ngày
+        SELECT 
+            DATE(v.NgayDat) AS Ngay,
+            SUM(v.GiaVe) AS DoanhThuVe,
+            0 AS DoanhThuCombo
+        FROM ve v
+        WHERE v.TrangThai = 'DaDat'
+          AND DATE(v.NgayDat) BETWEEN p_NgayBatDau AND p_NgayKetThuc
+        GROUP BY DATE(v.NgayDat)
+
+        UNION ALL
+
+        -- Doanh thu combo theo ngày
+        SELECT 
+            DATE(h.NgayMua) AS Ngay,
+            0 AS DoanhThuVe,
+            SUM(h.TongTien) AS DoanhThuCombo
+        FROM hoadon h
+        WHERE DATE(h.NgayMua) BETWEEN p_NgayBatDau AND p_NgayKetThuc
+        GROUP BY DATE(h.NgayMua)
+    ) AS doanh_thu_theo_ngay
+    GROUP BY Ngay
+    ORDER BY Ngay DESC;
 END //
 
 DELIMITER ;
+
 
 -- 5. PROCEDURE: Báo cáo doanh thu theo phim
 -- Mục đích: Xem phim nào bán chạy nhất
 DELIMITER //
 
-CREATE PROCEDURE sp_BaoCaoDoanhThuTheoPhim(
-    IN p_NgayBatDau DATE,
-    IN p_NgayKetThuc DATE
-)
+CREATE PROCEDURE sp_BaoCaoDoanhThuTheoPhim()
 BEGIN
     SELECT 
         p.MaPhim,
         p.TenPhim,
         p.TheLoai,
         COUNT(DISTINCT v.MaVe) AS SoVeBan,
-        SUM(v.GiaVe) AS DoanhThuVe,
-        SUM(IFNULL(h.TongTien, 0)) AS TongDoanhThu,
-        AVG(v.GiaVe) AS GiaVeTrungBinh
+        SUM(v.GiaVe) AS DoanhThu
     FROM phim p
     INNER JOIN suatchieu sc ON p.MaPhim = sc.MaPhim
     INNER JOIN ve v ON sc.MaSuatChieu = v.MaSuatChieu
-    LEFT JOIN hoadon h ON v.MaVe = h.MaVe
     WHERE v.TrangThai = 'DaDat'
-        AND DATE(v.NgayDat) BETWEEN p_NgayBatDau AND p_NgayKetThuc
-    GROUP BY p.MaPhim, p.TenPhim, p.TheLoai
-    ORDER BY DoanhThuVe DESC;
+    GROUP BY p.MaPhim;
 END //
 
 DELIMITER ;

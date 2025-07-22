@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thống Kê - Cinema Management</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/sidebar.css" />
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <!-- XLSX Library for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  </head>
+  <body>
+    <!-- Sidebar will be loaded here -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Header -->
+      <div class="ultra-header fade-in-up">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h1 class="ultra-header-title">
+              <i class="fas fa-chart-line"></i>
+              Thống Kê Rạp Phim
+            </h1>
+            <p class="ultra-header-subtitle">
+              Phân tích doanh thu và hiệu suất kinh doanh
+            </p>
+          </div>
+          <div class="d-flex gap-3">
+            <button
+              class="ultra-btn ultra-btn-secondary"
+              onclick="exportReport()"
+            >
+              <i class="fas fa-download me-2"></i>Xuất báo cáo
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="stats-grid fade-in-up">
+        <div class="ultra-stat-card">
+          <div class="ultra-stat-number" id="totalRevenueCount">0</div>
+          <div class="ultra-stat-label">Tổng Doanh Thu (VND)</div>
+          <div class="ultra-stat-icon">
+            <i class="fas fa-money-bill-wave"></i>
+          </div>
+        </div>
+        <div class="ultra-stat-card">
+          <div class="ultra-stat-number" id="totalTicketsSoldCount">0</div>
+          <div class="ultra-stat-label">Tổng Vé Bán</div>
+          <div class="ultra-stat-icon">
+            <i class="fas fa-ticket-alt"></i>
+          </div>
+        </div>
+        <div class="ultra-stat-card">
+          <div class="ultra-stat-number" id="avgRevenuePerMovieCount">0</div>
+          <div class="ultra-stat-label">Doanh Thu TB/Phim (VND)</div>
+          <div class="ultra-stat-icon">
+            <i class="fas fa-film"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date Range Filter -->
+      <div class="ultra-search-container fade-in-up">
+        <div class="row align-items-end">
+          <div class="col-md-4">
+            <div class="ultra-form-group">
+              <label class="ultra-form-label">
+                <i class="fas fa-calendar me-2"></i>Từ ngày
+              </label>
+              <input
+                type="date"
+                class="ultra-form-control"
+                id="fromDate"
+                value=""
+              />
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="ultra-form-group">
+              <label class="ultra-form-label">
+                <i class="fas fa-calendar me-2"></i>Đến ngày
+              </label>
+              <input
+                type="date"
+                class="ultra-form-control"
+                id="toDate"
+                value=""
+              />
+            </div>
+          </div>
+          <div class="col-md-4 ultra-form-group pb-2">
+            <button
+              type="button"
+              class="ultra-btn ultra-btn-primary"
+              onclick="updateRevenueChart()"
+            >
+              <i class="fas fa-search me-2"></i>Thống kê
+            </button>
+          </div>
+        </div>
+
+        <!-- Date Preset Buttons -->
+        <div class="row mt-3">
+          <div class="col-12">
+            <div class="d-flex gap-2 flex-wrap">
+              <button
+                type="button"
+                class="ultra-btn ultra-btn-secondary ultra-btn-sm"
+                onclick="setDateRange(7)"
+              >
+                <i class="fas fa-calendar-week me-2"></i>7 ngày qua
+              </button>
+              <button
+                type="button"
+                class="ultra-btn ultra-btn-secondary ultra-btn-sm"
+                onclick="setDateRange(30)"
+              >
+                <i class="fas fa-calendar-alt me-2"></i>30 ngày qua
+              </button>
+              <button
+                type="button"
+                class="ultra-btn ultra-btn-secondary ultra-btn-sm"
+                onclick="setDateRange(90)"
+              >
+                <i class="fas fa-calendar me-2"></i>90 ngày qua
+              </button>
+              <button
+                type="button"
+                class="ultra-btn ultra-btn-secondary ultra-btn-sm"
+                onclick="setCurrentMonth()"
+              >
+                <i class="fas fa-calendar-day me-2"></i>Tháng này
+              </button>
+              <button
+                type="button"
+                class="ultra-btn ultra-btn-secondary ultra-btn-sm"
+                onclick="setLastMonth()"
+              >
+                <i class="fas fa-calendar-minus me-2"></i>Tháng trước
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Revenue Chart -->
+      <div class="mb-4">
+        <div class="ultra-table-container">
+          <div class="p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h5 style="color: white; font-weight: 600; margin: 0">
+                <i class="fas fa-chart-line me-2"></i>Doanh Thu Theo Ngày
+              </h5>
+              <div class="ultra-view-toggle">
+                <button
+                  class="ultra-btn active"
+                  id="revenueChartBtn"
+                  onclick="switchRevenueView('chart')"
+                >
+                  <i class="fas fa-chart-line me-1"></i>Biểu đồ
+                </button>
+                <button
+                  class="ultra-btn"
+                  id="revenueTableBtn"
+                  onclick="switchRevenueView('table')"
+                >
+                  <i class="fas fa-table me-1"></i>Bảng
+                </button>
+              </div>
+            </div>
+
+            <!-- Chart View -->
+            <div
+              id="revenueChartView"
+              style="position: relative; height: 400px"
+            >
+              <canvas id="revenueChart"></canvas>
+            </div>
+
+            <!-- Table View -->
+            <div id="revenueTableView" style="display: none">
+              <div class="table-responsive">
+                <table class="ultra-table">
+                  <thead>
+                    <tr>
+                      <th>Ngày</th>
+                      <th>Doanh thu vé (VND)</th>
+                      <th>Doanh thu combo (VND)</th>
+                      <th>Tổng doanh thu (VND)</th>
+                      <th>Số vé bán</th>
+                      <th>Tỷ lệ (%)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="revenueTableBody">
+                    <!-- Data will be loaded here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row fade-in-up" style="animation-delay: 0.4s">
+        <!-- Occupancy Rate Chart -->
+        <div class="col-lg-6 mb-4">
+          <div class="ultra-table-container">
+            <div class="p-4">
+              <div
+                class="d-flex justify-content-between align-items-center mb-4"
+              >
+                <h5 style="color: white; font-weight: 600; margin: 0">
+                  <i class="fas fa-chair me-2"></i>Tỷ Lệ Lấp Đầy Suất Chiếu
+                </h5>
+                <div class="ultra-view-toggle">
+                  <button
+                    class="ultra-btn active"
+                    id="occupancyChartBtn"
+                    onclick="switchOccupancyView('chart')"
+                  >
+                    <i class="fas fa-chart-pie me-1"></i>Biểu đồ
+                  </button>
+                  <button
+                    class="ultra-btn"
+                    id="occupancyTableBtn"
+                    onclick="switchOccupancyView('table')"
+                  >
+                    <i class="fas fa-table me-1"></i>Bảng
+                  </button>
+                </div>
+              </div>
+
+              <!-- Showtime Selection -->
+              <div class="mb-3">
+                <div class="ultra-form-group">
+                  <label class="ultra-form-label">
+                    <i class="fas fa-film me-2"></i>Chọn suất chiếu để xem tỷ lệ
+                    lấp đầy
+                  </label>
+                  <select class="ultra-form-control" id="showtimeSelect">
+                    <option value="">Chọn suất chiếu...</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Chart View -->
+              <div
+                id="occupancyChartView"
+                style="position: relative; height: 300px"
+              >
+                <canvas id="occupancyChart"></canvas>
+              </div>
+
+              <!-- Table View -->
+              <div id="occupancyTableView" style="display: none">
+                <div class="table-responsive">
+                  <table class="ultra-table">
+                    <thead>
+                      <tr>
+                        <th>Thông tin</th>
+                        <th>Giá trị</th>
+                      </tr>
+                    </thead>
+                    <tbody id="occupancyTableBody">
+                      <!-- Data will be loaded here -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Revenue Breakdown Chart -->
+        <div class="col-lg-6 mb-4">
+          <div class="ultra-table-container">
+            <div class="p-4">
+              <div
+                class="d-flex justify-content-between align-items-center mb-4"
+              >
+                <h5 style="color: white; font-weight: 600; margin: 0">
+                  <i class="fas fa-chart-pie me-2"></i>Cơ Cấu Doanh Thu
+                </h5>
+                <div class="ultra-view-toggle">
+                  <button
+                    class="ultra-btn active"
+                    id="breakdownChartBtn"
+                    onclick="switchBreakdownView('chart')"
+                  >
+                    <i class="fas fa-chart-pie me-1"></i>Biểu đồ
+                  </button>
+                  <button
+                    class="ultra-btn"
+                    id="breakdownTableBtn"
+                    onclick="switchBreakdownView('table')"
+                  >
+                    <i class="fas fa-table me-1"></i>Bảng
+                  </button>
+                </div>
+              </div>
+
+              <!-- Chart View -->
+              <div
+                id="breakdownChartView"
+                style="position: relative; height: 300px"
+              >
+                <canvas id="revenueBreakdownChart"></canvas>
+              </div>
+
+              <!-- Table View -->
+              <div id="breakdownTableView" style="display: none">
+                <div class="table-responsive">
+                  <table class="ultra-table">
+                    <thead>
+                      <tr>
+                        <th>Loại doanh thu</th>
+                        <th>Giá trị (VND)</th>
+                        <th>Tỷ lệ (%)</th>
+                      </tr>
+                    </thead>
+                    <tbody id="breakdownTableBody">
+                      <!-- Data will be loaded here -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Movie Revenue Chart -->
+      <div class="mb-4">
+        <div class="ultra-table-container">
+          <div class="p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h5 style="color: white; font-weight: 600; margin: 0">
+                <i class="fas fa-film me-2"></i>Doanh Thu Theo Phim
+              </h5>
+              <div class="ultra-view-toggle">
+                <button
+                  class="ultra-btn active"
+                  id="movieChartBtn"
+                  onclick="switchMovieView('chart')"
+                >
+                  <i class="fas fa-chart-pie me-1"></i>Biểu đồ
+                </button>
+                <button
+                  class="ultra-btn"
+                  id="movieTableBtn"
+                  onclick="switchMovieView('table')"
+                >
+                  <i class="fas fa-table me-1"></i>Bảng
+                </button>
+              </div>
+            </div>
+
+            <!-- Chart View -->
+            <div id="movieChartView" style="position: relative; height: 400px">
+              <canvas id="movieRevenueChart"></canvas>
+            </div>
+
+            <!-- Table View -->
+            <div id="movieTableView" style="display: none">
+              <div
+                class="table-responsive"
+                style="max-height: 400px; overflow-y: auto"
+              >
+                <table class="ultra-table">
+                  <thead>
+                    <tr>
+                      <th>Phim</th>
+                      <th>Doanh thu (VND)</th>
+                      <th>Số vé bán</th>
+                      <th>Tỷ lệ (%)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="movieTableBody">
+                    <!-- Data will be loaded here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="loadingState" class="ultra-loading" style="display: none">
+        <div class="ultra-spinner"></div>
+      </div>
+
+      <!-- Empty State -->
+      <div
+        id="emptyState"
+        class="ultra-empty-state fade-in-up"
+        style="display: none"
+      >
+        <div class="ultra-empty-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <h3 class="ultra-empty-title">Chưa có dữ liệu thống kê</h3>
+        <p class="ultra-empty-description">
+          Hãy chọn khoảng thời gian để xem báo cáo thống kê chi tiết
+        </p>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/sidebar.js"></script>
+    <script src="js/thongke_api.js"></script>
+  </body>
+</html>

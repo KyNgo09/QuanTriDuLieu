@@ -1,6 +1,6 @@
 MYSQL_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': '091004',
+    'password': '3306',
     'database': 'qlrapphim'
 }

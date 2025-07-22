@@ -49,6 +49,7 @@ def get_khachhang_by_id(ma_kh):
             conn.close()
 
 # Thêm khách hàng mới
+@khachhang_bp.route('', methods=['POST'])
 @khachhang_bp.route('/', methods=['POST'])
 def create_khachhang():
     data = request.get_json()

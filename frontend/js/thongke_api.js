@@ -106,19 +106,26 @@ class ThongKeAPI {
    * @returns {Promise} Response object
    */
   static async getSuatChieuList() {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No token found, please login");
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_BASE_URL}/suatchieu`, {
+      const response = await fetch(`${API_BASE_URL}/suatchieu/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
+        }
+        throw new Error(
+          `Error fetching suat chieu list: ${response.statusText}`
+        );
       }
       return await response.json();
     } catch (error) {
-      console.error("Error fetching suất chiếu list:", error);
+      console.error("Failed to fetch suat chieu list:", error);
       throw error;
     }
   }
@@ -273,7 +280,7 @@ async function loadShowtimeOptions() {
   try {
     // Load available showtimes using ThongKeAPI
     const response = await ThongKeAPI.getSuatChieuList();
-    const showtimes = response.data || [];
+    const showtimes = response || [];
 
     const select = document.getElementById("showtimeSelect");
     select.innerHTML = '<option value="">Chọn suất chiếu...</option>';
@@ -946,6 +953,11 @@ function animateNumber(elementId, targetValue, formatter = null) {
     const elapsed = currentTime - startTime;
     const progress = Math.min(elapsed / duration, 1);
     const currentValue = startValue + (targetValue - startValue) * progress;
+
+    if (!element) {
+      console.warn(`Element with ID ${elementId} not found`);
+      return;
+    }
 
     if (formatter) {
       element.textContent = formatter(currentValue);

@@ -449,31 +449,31 @@ class SidebarManager {
   /**
    * Handle load errors
    */
-  handleLoadError(error) {
-    console.error("Sidebar load error:", error);
+  // handleLoadError(error) {
+  //   console.error("Sidebar load error:", error);
 
-    const container = document.getElementById(this.config.containerId);
-    if (container) {
-      container.innerHTML = `
-                <div class="sidebar-error">
-                    <div class="alert alert-danger m-3">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            <div>
-                                <strong>Lỗi tải sidebar</strong><br>
-                                <small>${error.message}</small>
-                            </div>
-                        </div>
-                        <button class="btn btn-sm btn-outline-danger mt-2" onclick="sidebarManager.reload()">
-                            <i class="fas fa-redo me-1"></i>Thử lại
-                        </button>
-                    </div>
-                </div>
-            `;
-    }
+  //   const container = document.getElementById(this.config.containerId);
+  //   if (container) {
+  //     container.innerHTML = `
+  //               <div class="sidebar-error">
+  //                   <div class="alert alert-danger m-3">
+  //                       <div class="d-flex align-items-center">
+  //                           <i class="fas fa-exclamation-triangle me-2"></i>
+  //                           <div>
+  //                               <strong>Lỗi tải sidebar</strong><br>
+  //                               <small>${error.message}</small>
+  //                           </div>
+  //                       </div>
+  //                       <button class="btn btn-sm btn-outline-danger mt-2" onclick="sidebarManager.reload()">
+  //                           <i class="fas fa-redo me-1"></i>Thử lại
+  //                       </button>
+  //                   </div>
+  //               </div>
+  //           `;
+  //   }
 
-    this.emit("loadError", { error });
-  }
+  //   this.emit("loadError", { error });
+  // }
 
   /**
    * Event system - Add event listener

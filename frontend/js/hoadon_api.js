@@ -2,114 +2,174 @@ const API_BASE_URL = 'http://127.0.0.1:5000/api';
 
 // Hoadon API
 class HoadonAPI {
+    static getToken() {
+        return localStorage.getItem("token");
+    }
+
     static async getHoadons() {
+        const token = this.getToken();
+        if (!token) throw new Error("Vui lòng đăng nhập");
         try {
-            console.log('Fetching hoadons from:', `${API_BASE_URL}/hoadon/`);
-            const response = await fetch(`${API_BASE_URL}/hoadon/`);
-            console.log('Hoadon API response:', response);
-            if (!response.ok) throw new Error(`HTTP ${response.status}: Failed to fetch hoadons`);
-            const data = await response.json();
-            console.log('Hoadon API data:', data);
-            return data;
+            const response = await fetch(`${API_BASE_URL}/hoadon/`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.removeItem("token");
+                    window.location.href = "/frontend/login.html";
+                }
+                throw new Error("Failed to fetch hoadons");
+            }
+            return await response.json();
         } catch (error) {
-            console.error('Error fetching hoadons:', error);
+            console.error("Error fetching hoadons:", error);
             throw error;
         }
     }
 
     static async getHoadon(id) {
+        const token = this.getToken();
+        if (!token) throw new Error("No token found, please login");
         try {
-            const response = await fetch(`${API_BASE_URL}/hoadon/${id}`);
-            if (!response.ok) throw new Error(`HTTP ${response.status}: Failed to fetch hoadon`);
+            const response = await fetch(`${API_BASE_URL}/hoadon/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.removeItem("token");
+                    window.location.href = "/frontend/login.html";
+                }
+                throw new Error("Failed to fetch hoadon");
+            }
             return await response.json();
         } catch (error) {
-            console.error(`Error fetching hoadon ${id}:`, error);
+            console.error("Error fetching hoadon:", error);
             throw error;
         }
     }
 
     static async getCombos() {
+        const token = this.getToken();
+        if (!token) throw new Error("Vui lòng đăng nhập");
         try {
-            console.log('Fetching combos from:', `${API_BASE_URL}/combo/`);
-            const response = await fetch(`${API_BASE_URL}/combo/`);
-            if (!response.ok) throw new Error(`HTTP ${response.status}: Failed to fetch combos`);
-            const data = await response.json();
-            console.log('Combo API data:', data);
-            return data;
+            const response = await fetch(`${API_BASE_URL}/combo/`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.removeItem("token");
+                    window.location.href = "/frontend/login.html";
+                }
+                throw new Error("Failed to fetch combos");
+            }
+            return await response.json();
         } catch (error) {
-            console.error('Error fetching combos:', error);
+            console.error("Error fetching combos:", error);
             throw error;
         }
     }
 
     static async getCombo(id) {
+        const token = this.getToken();
+        if (!token) throw new Error("No token found, please login");
         try {
-            const response = await fetch(`${API_BASE_URL}/combo/${id}`);
-            if (!response.ok) throw new Error(`HTTP ${response.status}: Failed to fetch combo`);
+            const response = await fetch(`${API_BASE_URL}/combo/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.removeItem("token");
+                    window.location.href = "/frontend/login.html";
+                }
+                throw new Error("Failed to fetch combo");
+            }
             return await response.json();
         } catch (error) {
-            console.error(`Error fetching combo ${id}:`, error);
+            console.error("Error fetching combo:", error);
             throw error;
         }
     }
 
     static async createHoadon(hoadonData) {
-    try {
-        console.log('Creating hoadon with data:', hoadonData);
-        const response = await fetch(`${API_BASE_URL}/hoadon/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(hoadonData)
-        });
-        console.log('Hoadon API response:', response);
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Server error response:', errorData);
-            throw new Error(`HTTP ${response.status}: ${errorData.message || 'Failed to create hoadon'}`);
+        const token = this.getToken();
+        if (!token) throw new Error("No token found, please login");
+        try {
+            const response = await fetch(`${API_BASE_URL}/hoadon/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(hoadonData),
+            });
+            if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.removeItem("token");
+                    window.location.href = "/frontend/login.html";
+                }
+                throw new Error("Failed to create hoadon");
+            }
+            return await response.json();
+        } catch (error) {
+            console.error("Error creating hoadon:", error);
+            throw error;
         }
-        const data = await response.json();
-        console.log('Created hoadon:', data);
-        return data;
-    } catch (error) {
-        console.error('Error creating hoadon:', error);
-        throw error;
     }
-}
 
     static async updateHoadon(id, hoadonData) {
+        const token = this.getToken();
+        if (!token) throw new Error("No token found, please login");
         try {
-            console.log(`Updating hoadon ${id} with data:`, hoadonData);
             const response = await fetch(`${API_BASE_URL}/hoadon/${id}`, {
-                method: 'PUT',
+                method: "PUT",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify(hoadonData)
+                body: JSON.stringify(hoadonData),
             });
-            if (!response.ok) throw new Error(`HTTP ${response.status}: Failed to update hoadon`);
-            const data = await response.json();
-            console.log('Updated hoadon:', data);
-            return data;
+            if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.removeItem("token");
+                    window.location.href = "/frontend/login.html";
+                }
+                throw new Error("Failed to update hoadon");
+            }
+            return await response.json();
         } catch (error) {
-            console.error(`Error updating hoadon ${id}:`, error);
+            console.error("Error updating hoadon:", error);
             throw error;
         }
     }
 
     static async deleteHoadon(id) {
+        const token = this.getToken();
+        if (!token) throw new Error("No token found, please login");
         try {
-            console.log(`Deleting hoadon ${id}`);
             const response = await fetch(`${API_BASE_URL}/hoadon/${id}`, {
-                method: 'DELETE'
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
             });
-            if (!response.ok) throw new Error(`HTTP ${response.status}: Failed to delete hoadon`);
-            const data = await response.json();
-            console.log('Deleted hoadon:', data);
-            return data;
+            if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.removeItem("token");
+                    window.location.href = "/frontend/login.html";
+                }
+                throw new Error("Failed to delete hoadon");
+            }
+            return await response.json();
         } catch (error) {
-            console.error(`Error deleting hoadon ${id}:`, error);
+            console.error("Error deleting hoadon:", error);
             throw error;
         }
     }
@@ -214,30 +274,39 @@ function updateEmptyState() {
 
 // Hoadon Management Functions
 async function loadHoadons() {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("Vui lòng đăng nhập!");
+        window.location.href = "/frontend/login.html";
+        return;
+    }
+
     showLoading();
     try {
-        console.log('Fetching hoadons...');
+        // Tải danh sách combo trước
+        await loadCombos();
+        
+        // Sau đó mới tải hóa đơn
         const hoadons = await HoadonAPI.getHoadons();
-        console.log('Received hoadons:', hoadons);
-        allHoadons = hoadons || [];
-        filteredHoadons = hoadons || [];
-        await loadCombos(); // Load combos for display
-        updateHoadonStats(allHoadons);
-        console.log('Rendering view, currentView:', currentView);
-        if (currentView === 'table') {
-            loadHoadonTableView(allHoadons);
+        allHoadons = hoadons;
+        filteredHoadons = hoadons;
+        updateHoadonStats(hoadons);
+        
+        if (currentView === "table") {
+            loadHoadonTableView(hoadons);
         } else {
-            loadHoadonCardView(allHoadons);
+            loadHoadonCardView(hoadons);
         }
         updateEmptyState();
     } catch (error) {
-        console.error('Error loading hoadons:', error);
-        showAlert(`Lỗi khi tải danh sách hóa đơn: ${error.message}`, 'danger');
+        showAlert("Lỗi khi tải danh sách hóa đơn: " + error.message, "danger");
+        if (error.message.includes("No token found")) {
+            window.location.href = "/frontend/login.html";
+        }
     } finally {
         hideLoading();
     }
 }
-
 function updateHoadonStats(hoadons) {
     console.log('updateHoadonStats: Input hoadons:', hoadons);
     

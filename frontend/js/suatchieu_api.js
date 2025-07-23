@@ -1,13 +1,25 @@
 const API_BASE_URL = "http://127.0.0.1:5000/api"; // Adjust this URL based on your backend configuration
 
 class SuatChieuAPI {
+  static getToken() {
+    return localStorage.getItem("token");
+  }
+
   static async getSuatChieuList() {
+    const token = this.getToken();
+    if (!token) throw new Error("No token found, please login");
     try {
-      const response = await fetch(`${API_BASE_URL}/suatchieu`);
+      const response = await fetch(`${API_BASE_URL}/suatchieu/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) {
-        throw new Error(
-          `Error fetching suat chieu list: ${response.statusText}`
-        );
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
+        }
+        throw new Error(`Error fetching suat chieu list: ${response.statusText}`);
       }
       return await response.json();
     } catch (error) {
@@ -17,12 +29,20 @@ class SuatChieuAPI {
   }
 
   static async getSuatChieuById(id) {
+    const token = this.getToken();
+    if (!token) throw new Error("No token found, please login");
     try {
-      const response = await fetch(`${API_BASE_URL}/suatchieu/${id}`);
+      const response = await fetch(`${API_BASE_URL}/suatchieu/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) {
-        throw new Error(
-          `Error fetching suat chieu by ID: ${response.statusText}`
-        );
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
+        }
+        throw new Error(`Error fetching suat chieu by ID: ${response.statusText}`);
       }
       return await response.json();
     } catch (error) {
@@ -32,16 +52,23 @@ class SuatChieuAPI {
   }
 
   static async createSuatChieu(suatChieuData) {
+    const token = this.getToken();
+    if (!token) throw new Error("No token found, please login");
     try {
       console.log("Creating suat chieu with data:", suatChieuData);
       const response = await fetch(`${API_BASE_URL}/suatchieu/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(suatChieuData),
       });
       if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
+        }
         throw new Error(`Error creating suat chieu: ${response.statusText}`);
       }
       return await response.json();
@@ -51,17 +78,23 @@ class SuatChieuAPI {
     }
   }
 
-  // Add more methods as needed for update, delete, etc.
   static async updateSuatChieu(id, suatChieuData) {
+    const token = this.getToken();
+    if (!token) throw new Error("No token found, please login");
     try {
       const response = await fetch(`${API_BASE_URL}/suatchieu/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(suatChieuData),
       });
       if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
+        }
         throw new Error(`Error updating suat chieu: ${response.statusText}`);
       }
       return await response.json();
@@ -72,11 +105,20 @@ class SuatChieuAPI {
   }
 
   static async deleteSuatChieu(id) {
+    const token = this.getToken();
+    if (!token) throw new Error("No token found, please login");
     try {
       const response = await fetch(`${API_BASE_URL}/suatchieu/${id}`, {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
       if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
+        }
         throw new Error(`Error deleting suat chieu: ${response.statusText}`);
       }
       return await response.json();
@@ -86,8 +128,9 @@ class SuatChieuAPI {
     }
   }
 
-  // Lấy danh sách suất chiếu với filter
   static async getSuatChieuWithFilter(filters = {}) {
+    const token = this.getToken();
+    if (!token) throw new Error("No token found, please login");
     try {
       const queryParams = new URLSearchParams();
 
@@ -105,8 +148,16 @@ class SuatChieuAPI {
         queryParams.toString() ? "?" + queryParams.toString() : ""
       }`;
 
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
+        }
         throw new Error(
           `Error fetching filtered suat chieu list: ${response.statusText}`
         );
@@ -437,6 +488,13 @@ function hideLoading() {
 
 // Load and Display Functions
 async function loadShowtimes() {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Vui lòng đăng nhập!");
+    window.location.href = "/frontend/login.html";
+    return;
+  }
+
   showLoading();
   try {
     const showtimes = await SuatChieuAPI.getSuatChieuList();
@@ -451,15 +509,30 @@ async function loadShowtimes() {
     updateEmptyState();
   } catch (error) {
     showAlert("Lỗi khi tải danh sách suất chiếu: " + error.message, "danger");
+    if (error.message.includes("No token found")) {
+      window.location.href = "/frontend/login.html";
+    }
   } finally {
     hideLoading();
   }
 }
 
 async function loadMovies() {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No token found, please login");
   try {
-    const response = await fetch(`${API_BASE_URL}/phim/`);
-    if (!response.ok) throw new Error("Failed to fetch movies");
+    const response = await fetch(`${API_BASE_URL}/phim/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+        window.location.href = "/frontend/login.html";
+      }
+      throw new Error("Failed to fetch movies");
+    }
     allMovies = await response.json();
     populateMovieSelects();
   } catch (error) {
@@ -468,9 +541,21 @@ async function loadMovies() {
 }
 
 async function loadRooms() {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No token found, please login");
   try {
-    const response = await fetch(`${API_BASE_URL}/phongchieu/`);
-    if (!response.ok) throw new Error("Failed to fetch cinema rooms");
+    const response = await fetch(`${API_BASE_URL}/phongchieu/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+        window.location.href = "/frontend/login.html";
+      }
+      throw new Error("Failed to fetch cinema rooms");
+    }
     allRooms = await response.json();
     populateRoomSelects();
   } catch (error) {
@@ -787,38 +872,58 @@ async function editShowtime(id) {
 }
 
 async function saveShowtime() {
-  const form = document.getElementById("suatChieuForm");
-  if (!form.checkValidity()) {
-    form.reportValidity();
-    return;
-  }
-
-  const showtimeData = {
-    MaPhim: parseInt(document.getElementById("maPhim").value),
-    MaPhong: parseInt(document.getElementById("maPhong").value),
-    NgayChieu: document.getElementById("ngayChieu").value,
-    // Chuyển giờ chiếu sang định dạng HH:mm:ss
-    GioChieu: document.getElementById("gioChieu").value + ":00",
-    GiaVe: parseFloat(document.getElementById("giaVe").value),
-  };
-
-  try {
-    const showtimeId = document.getElementById("suatChieuId").value;
-    if (showtimeId) {
-      await SuatChieuAPI.updateSuatChieu(showtimeId, showtimeData);
-      showAlert("Cập nhật suất chiếu thành công!", "success");
-    } else {
-      await SuatChieuAPI.createSuatChieu(showtimeData);
-      showAlert("Thêm suất chiếu thành công!", "success");
+    const form = document.getElementById("suatChieuForm");
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
     }
 
-    bootstrap.Modal.getInstance(
-      document.getElementById("suatChieuModal")
-    ).hide();
-    loadShowtimes();
-  } catch (error) {
-    showAlert("Lỗi khi lưu suất chiếu: " + error.message, "danger");
-  }
+    const gioChieuInput = document.getElementById("gioChieu").value;
+    let gioChieu;
+    
+    // Kiểm tra và chuẩn hóa định dạng GioChieu
+    if (gioChieuInput.match(/^\d{2}:\d{2}$/)) {
+        gioChieu = gioChieuInput + ":00"; // Thêm :00 nếu là HH:mm
+    } else if (gioChieuInput.match(/^\d{2}:\d{2}:\d{2}$/)) {
+        gioChieu = gioChieuInput; // Giữ nguyên nếu đã là HH:mm:ss
+    } else {
+        showAlert("Giờ chiếu phải có định dạng HH:mm hoặc HH:mm:ss", "danger");
+        return;
+    }
+
+    const showtimeData = {
+        MaPhim: parseInt(document.getElementById("maPhim").value),
+        MaPhong: parseInt(document.getElementById("maPhong").value),
+        NgayChieu: document.getElementById("ngayChieu").value,
+        GioChieu: gioChieu,
+        GiaVe: parseFloat(document.getElementById("giaVe").value),
+    };
+    console.log("Sending showtimeData:", showtimeData);
+
+    // Kiểm tra dữ liệu
+    if (isNaN(showtimeData.MaPhim) || isNaN(showtimeData.MaPhong) || isNaN(showtimeData.GiaVe)) {
+        showAlert("Dữ liệu không hợp lệ: Vui lòng kiểm tra các trường số", "danger");
+        return;
+    }
+    if (!showtimeData.NgayChieu || !gioChieu.match(/^\d{2}:\d{2}:\d{2}$/)) {
+        showAlert("Ngày chiếu hoặc giờ chiếu không hợp lệ", "danger");
+        return;
+    }
+
+    try {
+        const showtimeId = document.getElementById("suatChieuId").value;
+        if (showtimeId) {
+            await SuatChieuAPI.updateSuatChieu(showtimeId, showtimeData);
+            showAlert("Cập nhật suất chiếu thành công!", "success");
+        } else {
+            await SuatChieuAPI.createSuatChieu(showtimeData);
+            showAlert("Thêm suất chiếu thành công!", "success");
+        }
+        bootstrap.Modal.getInstance(document.getElementById("suatChieuModal")).hide();
+        loadShowtimes();
+    } catch (error) {
+        showAlert("Lỗi khi lưu suất chiếu: " + error.message, "danger");
+    }
 }
 
 async function deleteShowtime(id) {

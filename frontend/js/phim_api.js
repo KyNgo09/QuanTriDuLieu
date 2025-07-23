@@ -2,76 +2,133 @@ const API_BASE_URL = "http://127.0.0.1:5000/api";
 
 // Movies API
 class PhimAPI {
-  static async getMovies() {
-    try {
-      const response = await fetch(`${API_BASE_URL}/phim/`);
-      if (!response.ok) throw new Error("Failed to fetch movies");
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error fetching movies:", error);
-      throw error;
+    static getToken() {
+        return localStorage.getItem("token");
     }
-  }
 
-  static async getMovie(id) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/phim/${id}`);
-      if (!response.ok) throw new Error("Failed to fetch movie");
-      return await response.json();
-    } catch (error) {
-      console.error("Error fetching movie:", error);
-      throw error;
+    static async getMovies() {
+        const token = this.getToken();
+        if (!token) throw new Error("Vui lòng đăng nhập");
+        try {
+            const response = await fetch(`${API_BASE_URL}/phim/`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.removeItem("token");
+                    window.location.href = "/frontend/login.html";
+                }
+                throw new Error("Failed to fetch movies");
+            }
+            return await response.json(); // Trả về mảng phim trực tiếp
+        } catch (error) {
+            console.error("Error fetching movies:", error);
+            throw error;
+        }
     }
-  }
 
-  static async createMovie(movieData) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/phim/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(movieData),
-      });
-      if (!response.ok) throw new Error("Failed to create movie");
-      return await response.json();
-    } catch (error) {
-      console.error("Error creating movie:", error);
-      throw error;
+    static async getMovie(id) {
+        const token = this.getToken();
+        if (!token) throw new Error("No token found, please login");
+        try {
+            const response = await fetch(`${API_BASE_URL}/phim/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.removeItem("token");
+                    window.location.href = "/frontend/login.html";
+                }
+                throw new Error("Failed to fetch movie");
+            }
+            return await response.json(); // Trả về đối tượng phim trực tiếp
+        } catch (error) {
+            console.error("Error fetching movie:", error);
+            throw error;
+        }
     }
-  }
 
-  static async updateMovie(id, movieData) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/phim/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(movieData),
-      });
-      if (!response.ok) throw new Error("Failed to update movie");
-      return await response.json();
-    } catch (error) {
-      console.error("Error updating movie:", error);
-      throw error;
+    static async createMovie(movieData) {
+        const token = this.getToken();
+        if (!token) throw new Error("No token found, please login");
+        try {
+            const response = await fetch(`${API_BASE_URL}/phim/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(movieData),
+            });
+            if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.removeItem("token");
+                    window.location.href = "/frontend/login.html";
+                }
+                throw new Error("Failed to create movie");
+            }
+            return await response.json();
+        } catch (error) {
+            console.error("Error creating movie:", error);
+            throw error;
+        }
     }
-  }
 
-  static async deleteMovie(id) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/phim/${id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Failed to delete movie");
-      return await response.json();
-    } catch (error) {
-      console.error("Error deleting movie:", error);
-      throw error;
+    static async updateMovie(id, movieData) {
+        const token = this.getToken();
+        if (!token) throw new Error("No token found, please login");
+        try {
+            const response = await fetch(`${API_BASE_URL}/phim/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(movieData),
+            });
+            if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.removeItem("token");
+                    window.location.href = "/frontend/login.html";
+                }
+                throw new Error("Failed to update movie");
+            }
+            return await response.json();
+        } catch (error) {
+            console.error("Error updating movie:", error);
+            throw error;
+        }
     }
-  }
+
+    static async deleteMovie(id) {
+        const token = this.getToken();
+        if (!token) throw new Error("No token found, please login");
+        try {
+            const response = await fetch(`${API_BASE_URL}/phim/${id}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.removeItem("token");
+                    window.location.href = "/frontend/login.html";
+                }
+                throw new Error("Failed to delete movie");
+            }
+            return await response.json();
+        } catch (error) {
+            console.error("Error deleting movie:", error);
+            throw error;
+        }
+    }
 }
+
 
 // Utility Functions for Movies
 function showAlert(message, type = "success") {
@@ -187,23 +244,33 @@ function hideLoading() {
 }
 
 async function loadMovies() {
-  showLoading();
-  try {
-    const movies = await PhimAPI.getMovies();
-    allMovies = movies;
-    filteredMovies = movies;
-    updateStats(movies);
-    if (currentView === "table") {
-      loadTableView(movies);
-    } else {
-      loadCardView(movies);
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("Vui lòng đăng nhập!");
+        window.location.href = "/frontend/login.html";
+        return;
     }
-    updateEmptyState();
-  } catch (error) {
-    showAlert("Lỗi khi tải danh sách phim: " + error.message, "danger");
-  } finally {
-    hideLoading();
-  }
+
+    showLoading();
+    try {
+        const movies = await PhimAPI.getMovies();
+        allMovies = movies;
+        filteredMovies = movies;
+        updateStats(movies);
+        if (currentView === "table") {
+            loadTableView(movies);
+        } else {
+            loadCardView(movies);
+        }
+        updateEmptyState();
+    } catch (error) {
+        showAlert("Lỗi khi tải danh sách phim: " + error.message, "danger");
+        if (error.message.includes("No token found")) {
+            window.location.href = "/frontend/login.html";
+        }
+    } finally {
+        hideLoading();
+    }
 }
 
 function updateStats(movies) {

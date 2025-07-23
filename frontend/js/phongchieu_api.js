@@ -2,12 +2,27 @@ const API_BASE_URL = "http://127.0.0.1:5000/api";
 
 // Cinema Rooms API
 class PhongChieuAPI {
+  static getToken() {
+    return localStorage.getItem("token");
+  }
+
   static async getCinemaRooms() {
+    const token = this.getToken();
+    if (!token) throw new Error("Vui lòng đăng nhập");
     try {
-      const response = await fetch(`${API_BASE_URL}/phongchieu/`);
-      if (!response.ok) throw new Error("Failed to fetch cinema rooms");
-      const data = await response.json();
-      return data;
+      const response = await fetch(`${API_BASE_URL}/phongchieu/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
+        }
+        throw new Error("Failed to fetch cinema rooms");
+      }
+      return await response.json();
     } catch (error) {
       console.error("Error fetching cinema rooms:", error);
       throw error;
@@ -15,9 +30,21 @@ class PhongChieuAPI {
   }
 
   static async getCinemaRoom(id) {
+    const token = this.getToken();
+    if (!token) throw new Error("No token found, please login");
     try {
-      const response = await fetch(`${API_BASE_URL}/phongchieu/${id}`);
-      if (!response.ok) throw new Error("Failed to fetch cinema room");
+      const response = await fetch(`${API_BASE_URL}/phongchieu/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
+        }
+        throw new Error("Failed to fetch cinema room");
+      }
       return await response.json();
     } catch (error) {
       console.error("Error fetching cinema room:", error);
@@ -26,15 +53,24 @@ class PhongChieuAPI {
   }
 
   static async createCinemaRoom(roomData) {
+    const token = this.getToken();
+    if (!token) throw new Error("No token found, please login");
     try {
       const response = await fetch(`${API_BASE_URL}/phongchieu/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(roomData),
       });
-      if (!response.ok) throw new Error("Failed to create cinema room");
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
+        }
+        throw new Error("Failed to create cinema room");
+      }
       return await response.json();
     } catch (error) {
       console.error("Error creating cinema room:", error);
@@ -43,15 +79,24 @@ class PhongChieuAPI {
   }
 
   static async updateCinemaRoom(id, roomData) {
+    const token = this.getToken();
+    if (!token) throw new Error("No token found, please login");
     try {
       const response = await fetch(`${API_BASE_URL}/phongchieu/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(roomData),
       });
-      if (!response.ok) throw new Error("Failed to update cinema room");
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
+        }
+        throw new Error("Failed to update cinema room");
+      }
       return await response.json();
     } catch (error) {
       console.error("Error updating cinema room:", error);
@@ -60,14 +105,131 @@ class PhongChieuAPI {
   }
 
   static async deleteCinemaRoom(id) {
+    const token = this.getToken();
+    if (!token) throw new Error("No token found, please login");
     try {
       const response = await fetch(`${API_BASE_URL}/phongchieu/${id}`, {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-      if (!response.ok) throw new Error("Failed to delete cinema room");
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
+        }
+        throw new Error("Failed to delete cinema room");
+      }
       return await response.json();
     } catch (error) {
       console.error("Error deleting cinema room:", error);
+      throw error;
+    }
+  }
+}
+
+// Chair Management API
+class ChairAPI {
+  static getToken() {
+    return localStorage.getItem("token");
+  }
+
+  static async getChairsByRoom(roomId) {
+    const token = this.getToken();
+    if (!token) throw new Error("No token found, please login");
+    try {
+      const response = await fetch(`${API_BASE_URL}/ghe/phong/${roomId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
+        }
+        throw new Error("Failed to fetch chairs");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching chairs:", error);
+      throw error;
+    }
+  }
+
+  static async createChair(chairData) {
+    const token = this.getToken();
+    if (!token) throw new Error("No token found, please login");
+    try {
+      const response = await fetch(`${API_BASE_URL}/ghe/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(chairData),
+      });
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
+        }
+        throw new Error("Failed to create chair");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error creating chair:", error);
+      throw error;
+    }
+  }
+
+  static async updateChair(id, chairData) {
+    const token = this.getToken();
+    if (!token) throw new Error("No token found, please login");
+    try {
+      const response = await fetch(`${API_BASE_URL}/ghe/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(chairData),
+      });
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
+        }
+        throw new Error("Failed to update chair");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error updating chair:", error);
+      throw error;
+    }
+  }
+
+  static async deleteChair(id) {
+    const token = this.getToken();
+    if (!token) throw new Error("No token found, please login");
+    try {
+      const response = await fetch(`${API_BASE_URL}/ghe/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
+        }
+        throw new Error("Failed to delete chair");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error deleting chair:", error);
       throw error;
     }
   }
@@ -184,6 +346,13 @@ function hideLoading() {
 }
 
 async function loadCinemaRooms() {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Vui lòng đăng nhập!");
+    window.location.href = "/frontend/login.html";
+    return;
+  }
+
   showLoading();
   try {
     const rooms = await PhongChieuAPI.getCinemaRooms();
@@ -198,6 +367,9 @@ async function loadCinemaRooms() {
     updateEmptyState();
   } catch (error) {
     showAlert("Lỗi khi tải danh sách phòng chiếu: " + error.message, "danger");
+    if (error.message.includes("No token found")) {
+      window.location.href = "/frontend/login.html";
+    }
   } finally {
     hideLoading();
   }
@@ -493,69 +665,8 @@ if (window.sidebarManager && window.sidebarManager.isLoaded()) {
 }
 
 /**
- * Chair Management API
+ * Chair Management Functions
  */
-class ChairAPI {
-  static async getChairsByRoom(roomId) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/ghe/phong/${roomId}`);
-      if (!response.ok) throw new Error("Failed to fetch chairs");
-      return await response.json();
-    } catch (error) {
-      console.error("Error fetching chairs:", error);
-      throw error;
-    }
-  }
-
-  static async createChair(chairData) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/ghe/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(chairData),
-      });
-      if (!response.ok) throw new Error("Failed to create chair");
-      return await response.json();
-    } catch (error) {
-      console.error("Error creating chair:", error);
-      throw error;
-    }
-  }
-
-  static async updateChair(id, chairData) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/ghe/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(chairData),
-      });
-      if (!response.ok) throw new Error("Failed to update chair");
-      return await response.json();
-    } catch (error) {
-      console.error("Error updating chair:", error);
-      throw error;
-    }
-  }
-
-  static async deleteChair(id) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/ghe/${id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Failed to delete chair");
-      return await response.json();
-    } catch (error) {
-      console.error("Error deleting chair:", error);
-      throw error;
-    }
-  }
-}
-
-// Chair Management Functions
 async function openChairModal(roomId) {
   currentRoomId = roomId;
 

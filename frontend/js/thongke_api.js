@@ -21,8 +21,14 @@ class ThongKeAPI {
    */
   static async thongKeDoanhThuTheoNgay(from, to) {
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(
-        `${API_BASE_URL}/thongke/doanh-thu-ngay?from=${from}&to=${to}`
+        `${API_BASE_URL}/thongke/doanh-thu-ngay?from=${from}&to=${to}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -53,7 +59,12 @@ class ThongKeAPI {
    */
   static async thongKeDoanhThuTheoPhim() {
     try {
-      const response = await fetch(`${API_BASE_URL}/thongke/doanh-thu-phim`);
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_BASE_URL}/thongke/doanh-thu-phim`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -71,15 +82,21 @@ class ThongKeAPI {
    */
   static async thongKeTyLeLapDaySuatChieu(maSuatChieu) {
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(
-        `${API_BASE_URL}/thongke/ty-le-lap-day/${maSuatChieu}`
+        `${API_BASE_URL}/thongke/ty-le-lap-day/${maSuatChieu}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       return await response.json();
     } catch (error) {
-      console.error("Error fetching tỷ lệ lập đầy suất chiếu data:", error);
+      console.error("Error fetching tỷ lệ lấp đầy suất chiếu data:", error);
       throw error;
     }
   }
@@ -90,7 +107,12 @@ class ThongKeAPI {
    */
   static async getSuatChieuList() {
     try {
-      const response = await fetch(`${API_BASE_URL}/suatchieu`);
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_BASE_URL}/suatchieu`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -147,6 +169,13 @@ let breakdownData = null;
 
 // Initialize page
 document.addEventListener("DOMContentLoaded", function () {
+  // Kiểm tra token ngay khi trang tải
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Vui lòng đăng nhập!");
+    window.location.replace("login.html");
+    return;
+  }
   initializePage();
 });
 
@@ -242,9 +271,9 @@ async function loadMovieRevenueChart() {
 
 async function loadShowtimeOptions() {
   try {
-    // Load available showtimes from suatchieu API
-    const response = await fetch("http://127.0.0.1:5000/api/suatchieu");
-    const showtimes = await response.json();
+    // Load available showtimes using ThongKeAPI
+    const response = await ThongKeAPI.getSuatChieuList();
+    const showtimes = response.data || [];
 
     const select = document.getElementById("showtimeSelect");
     select.innerHTML = '<option value="">Chọn suất chiếu...</option>';

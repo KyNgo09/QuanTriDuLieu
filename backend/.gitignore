@@ -27,7 +27,7 @@ ehthumbs.db
 Icon?
 
 # Environment variables (nếu có file .env)
-.env
+# .env
 
 # Pytest cache
 .pytest_cache/

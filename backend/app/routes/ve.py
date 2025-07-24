@@ -5,7 +5,7 @@ from app.utils import convert_datetime_fields
 ve_bp = Blueprint('ve', __name__)
 
 # Lấy tất cả vé
-@ve_bp.route('/', methods=['GET'])
+@ve_bp.route('', methods=['GET'], strict_slashes=False)
 def get_all_ve():
     conn = None
     cursor = None
@@ -267,7 +267,7 @@ def get_ve_by_suatchieu(ma_suat_chieu):
         if conn:
             conn.close()
 
-@ve_bp.route('/dat-ve', methods=['POST'])
+@ve_bp.route('/dat-ve', methods=['POST'], strict_slashes=False)
 def dat_ve():
     """
     Đặt vé sử dụng procedure sp_DatVe
@@ -277,7 +277,9 @@ def dat_ve():
     ma_kh = data.get('MaKH')
     ma_ghe = data.get('MaGhe')
 
-    if not (ma_suatchieu and ma_kh and ma_ghe):
+    print("data", data)
+    
+    if (ma_suatchieu is None or ma_kh is None or ma_ghe is None):
         return jsonify({"message": "Thiếu thông tin đặt vé"}), 400
 
     conn = None
@@ -301,7 +303,9 @@ def dat_ve():
         result = cursor.fetchone()
         ket_qua = result[0]
         ma_ve = result[1]
+        print("Kết quả đặt vé:", ket_qua)
 
+    
         if ma_ve:
             # Lấy thông tin vé vừa đặt
             cursor.execute(

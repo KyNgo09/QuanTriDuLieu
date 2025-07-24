@@ -2,131 +2,131 @@ const API_BASE_URL = "http://127.0.0.1:5000/api";
 
 // Customer API
 class CustomerAPI {
-    static getToken() {
-        return localStorage.getItem("token");
-    }
+  static getToken() {
+    return localStorage.getItem("token");
+  }
 
-    static async getCustomers() {
-        const token = this.getToken();
-        if (!token) throw new Error("Vui lòng đăng nhập");
-        try {
-            const response = await fetch(`${API_BASE_URL}/khachhang/`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            if (!response.ok) {
-                if (response.status === 401) {
-                    localStorage.removeItem("token");
-                    window.location.href = "/frontend/login.html";
-                }
-                throw new Error("Failed to fetch customers");
-            }
-            return await response.json();
-        } catch (error) {
-            console.error("Error fetching customers:", error);
-            throw error;
+  static async getCustomers() {
+    const token = this.getToken();
+    if (!token) throw new Error("Vui lòng đăng nhập");
+    try {
+      const response = await fetch(`${API_BASE_URL}/khachhang/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
         }
+        throw new Error("Failed to fetch customers");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+      throw error;
     }
+  }
 
-    static async addCustomer(customerData) {
-        const token = this.getToken();
-        if (!token) throw new Error("No token found, please login");
-        try {
-            const response = await fetch(`${API_BASE_URL}/khachhang`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify(customerData),
-            });
-            if (!response.ok) {
-                if (response.status === 401) {
-                    localStorage.removeItem("token");
-                    window.location.href = "/frontend/login.html";
-                }
-                throw new Error("Failed to add customer");
-            }
-            return await response.json();
-        } catch (error) {
-            console.error("Error adding customer:", error);
-            throw error;
+  static async addCustomer(customerData) {
+    const token = this.getToken();
+    if (!token) throw new Error("No token found, please login");
+    try {
+      const response = await fetch(`${API_BASE_URL}/khachhang`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(customerData),
+      });
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
         }
+        throw new Error("Failed to add customer");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error adding customer:", error);
+      throw error;
     }
+  }
 
-    static async updateCustomer(customerId, customerData) {
-        const token = this.getToken();
-        if (!token) throw new Error("No token found, please login");
-        try {
-            const response = await fetch(`${API_BASE_URL}/khachhang/${customerId}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify(customerData),
-            });
-            if (!response.ok) {
-                if (response.status === 401) {
-                    localStorage.removeItem("token");
-                    window.location.href = "/frontend/login.html";
-                }
-                throw new Error("Failed to update customer");
-            }
-            return await response.json();
-        } catch (error) {
-            console.error("Error updating customer:", error);
-            throw error;
+  static async updateCustomer(customerId, customerData) {
+    const token = this.getToken();
+    if (!token) throw new Error("No token found, please login");
+    try {
+      const response = await fetch(`${API_BASE_URL}/khachhang/${customerId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(customerData),
+      });
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
         }
+        throw new Error("Failed to update customer");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error updating customer:", error);
+      throw error;
     }
+  }
 
-    static async deleteCustomer(customerId) {
-        const token = this.getToken();
-        if (!token) throw new Error("No token found, please login");
-        try {
-            const response = await fetch(`${API_BASE_URL}/khachhang/${customerId}`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            if (!response.ok) {
-                if (response.status === 401) {
-                    localStorage.removeItem("token");
-                    window.location.href = "/frontend/login.html";
-                }
-                throw new Error("Failed to delete customer");
-            }
-            return await response.json();
-        } catch (error) {
-            console.error("Error deleting customer:", error);
-            throw error;
+  static async deleteCustomer(customerId) {
+    const token = this.getToken();
+    if (!token) throw new Error("No token found, please login");
+    try {
+      const response = await fetch(`${API_BASE_URL}/khachhang/${customerId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
         }
+        throw new Error("Failed to delete customer");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error deleting customer:", error);
+      throw error;
     }
+  }
 
-    static async getCustomerById(customerId) {
-        const token = this.getToken();
-        if (!token) throw new Error("No token found, please login");
-        try {
-            const response = await fetch(`${API_BASE_URL}/khachhang/${customerId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            if (!response.ok) {
-                if (response.status === 401) {
-                    localStorage.removeItem("token");
-                    window.location.href = "/frontend/login.html";
-                }
-                throw new Error("Không thể tải thông tin khách hàng");
-            }
-            return await response.json();
-        } catch (error) {
-            console.error("Error getCustomerById:", error);
-            throw error;
+  static async getCustomerById(customerId) {
+    const token = this.getToken();
+    if (!token) throw new Error("No token found, please login");
+    try {
+      const response = await fetch(`${API_BASE_URL}/khachhang/${customerId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/frontend/login.html";
         }
+        throw new Error("Không thể tải thông tin khách hàng");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error getCustomerById:", error);
+      throw error;
     }
+  }
 }
 
 // Global Variables for Customer
@@ -285,32 +285,32 @@ function openAddModal() {
 
 // Load Customers
 async function loadCustomers() {
-    const token = localStorage.getItem("token");
-    if (!token) {
-        alert("Vui lòng đăng nhập!");
-        window.location.href = "/frontend/login.html";
-        return;
-    }
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Vui lòng đăng nhập!");
+    window.location.href = "/frontend/login.html";
+    return;
+  }
 
-    showLoading();
-    try {
-        const customers = await CustomerAPI.getCustomers();
-        allCustomers = customers;
-        updateStats(customers);
-        if (currentView === "table") {
-            loadTableView(customers);
-        } else {
-            loadCardView(customers);
-        }
-        updateEmptyState();
-    } catch (error) {
-        showAlert("Lỗi khi tạo danh sách khách hàng: " + error.message, "danger");
-        if (error.message.includes("No token found")) {
-            window.location.href = "/frontend/login.html";
-        }
-    } finally {
-        hideLoading();
+  showLoading();
+  try {
+    const customers = await CustomerAPI.getCustomers();
+    allCustomers = customers;
+    updateStats(customers);
+    if (currentView === "table") {
+      loadTableView(customers);
+    } else {
+      loadCardView(customers);
     }
+    updateEmptyState();
+  } catch (error) {
+    showAlert("Lỗi khi tạo danh sách khách hàng: " + error.message, "danger");
+    if (error.message.includes("No token found")) {
+      window.location.href = "/frontend/login.html";
+    }
+  } finally {
+    hideLoading();
+  }
 }
 
 function animateNumber(elementId, targetValue) {

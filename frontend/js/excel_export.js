@@ -1,4 +1,4 @@
-// Universal Excel Export - Supports Movies & Cinema Rooms
+// Universal Excel Export - Supports Movies, Cinema Rooms, Combo, Invoices, Customers & Showtimes
 console.log('📊 Universal Excel Export module loading...');
 
 // Universal Excel Export Class
@@ -17,8 +17,7 @@ class UniversalExcelExporter {
                     this.formatDate(item.NgayKhoiChieu),
                     item.DoTuoiChoPhep || ''
                 ],
-                fileName: 'Danh_Sach_Phim',
-                
+                fileName: 'Danh_Sach_Phim'
             },
             rooms: {
                 headers: ['Mã Phòng', 'Tên Phòng', 'Số Ghế', 'Loại Phòng'],
@@ -28,7 +27,51 @@ class UniversalExcelExporter {
                     item.SoGhe || '',
                     item.LoaiPhong || ''
                 ],
-                
+                fileName: 'Danh_Sach_Phong_Chieu'
+            },
+            combo: {
+                headers: ['Mã Combo', 'Tên Combo', 'Giá Combo', 'Mô Tả'],
+                mapper: (item) => [
+                    item.MaCombo || '',
+                    item.TenCombo || '',
+                    item.GiaCombo || '',
+                    item.MoTa || ''
+                ],
+                fileName: 'Danh_Sach_Combo'
+            },
+            hoadon: {
+                headers: ['Mã Hóa Đơn', 'Mã Khách Hàng', 'Mã Combo', 'Số Lượng', 'Ngày Mua', 'Tổng Tiền'],
+                mapper: (item) => [
+                    item.MaHoaDon || '',
+                    item.MaKH || '',
+                    item.MaCombo || '',
+                    item.SoLuong || '',
+                    this.formatDate(item.NgayMua),
+                    item.TongTien || ''
+                ],
+                fileName: 'Danh_Sach_Hoa_Don'
+            },
+            khachhang: {
+                headers: ['Mã Khách Hàng', 'Tên Khách Hàng', 'Số Điện Thoại', 'Email'],
+                mapper: (item) => [
+                    item.MaKH || '',
+                    item.TenKH || '',
+                    item.SDT || '',
+                    item.Email || ''
+                ],
+                fileName: 'Danh_Sach_Khach_Hang'
+            },
+            suatchieu: {
+                headers: ['Mã Suất Chiếu', 'Mã Phim', 'Mã Phòng', 'Ngày Chiếu', 'Giờ Chiếu', 'Giá Vé'],
+                mapper: (item) => [
+                    item.MaSuatChieu || '',
+                    item.MaPhim || '',
+                    item.MaPhong || '',
+                    this.formatDate(item.NgayChieu),
+                    item.GioChieu || '',
+                    item.GiaVe || ''
+                ],
+                fileName: 'Danh_Sach_Suat_Chieu'
             }
         };
     }
@@ -38,7 +81,15 @@ class UniversalExcelExporter {
         
         if (!data || data.length === 0) {
             console.warn(`❌ No ${dataType} data to export`);
-            alert(`Không có dữ liệu ${dataType === 'movies' ? 'phim' : 'phòng chiếu'} để xuất`);
+            const typeNames = {
+                movies: 'phim',
+                rooms: 'phòng chiếu',
+                combo: 'combo',
+                hoadon: 'hóa đơn',
+                khachhang: 'khách hàng',
+                suatchieu: 'suất chiếu'
+            };
+            alert(`Không có dữ liệu ${typeNames[dataType] || dataType} để xuất`);
             return;
         }
         
@@ -133,9 +184,8 @@ class UniversalExcelExporter {
             }
         }
         
-        // Final fallback: sample data
-        console.log(`🔄 Using sample ${dataType} data`);
-        return this.dataConfigs[dataType].sampleData;
+        console.log(`❌ No ${dataType} data available`);
+        return [];
     }
     
     formatDate(dateString) {
@@ -180,6 +230,10 @@ class UniversalExcelExporter {
 
 // Create global instance
 window.universalExporter = new UniversalExcelExporter();
+
+// ============= EXPORT FUNCTIONS =============
+
+// Movies Export
 async function exportCurrentMovies() {
     console.log('🎬 exportCurrentMovies called');
     
@@ -188,6 +242,8 @@ async function exportCurrentMovies() {
         () => window.allMovies, 
         () => window.filteredPhim,
         () => window.allPhim,
+        () => window.movies,
+        () => window.phim,
         () => typeof allMovies !== 'undefined' ? allMovies : null,
         () => typeof filteredMovies !== 'undefined' ? filteredMovies : null
     ];
@@ -201,7 +257,7 @@ async function exportCurrentMovies() {
     await window.universalExporter.exportData(data, 'movies');
 }
 
-
+// Rooms Export
 async function exportCurrentRooms() {
     console.log('🏠 exportCurrentRooms called');
     
@@ -210,6 +266,8 @@ async function exportCurrentRooms() {
         () => window.allRooms,
         () => window.filteredPhong,
         () => window.allPhong,
+        () => window.rooms,
+        () => window.phong,
         () => typeof allRooms !== 'undefined' ? allRooms : null,
         () => typeof filteredRooms !== 'undefined' ? filteredRooms : null
     ];
@@ -223,15 +281,118 @@ async function exportCurrentRooms() {
     await window.universalExporter.exportData(data, 'rooms');
 }
 
+// Combo Export
+async function exportCurrentCombo() {
+    console.log('🍿 exportCurrentCombo called');
+    
+    const comboDataSources = [
+        () => window.filteredCombo,
+        () => window.allCombo,
+        () => window.filteredCombos,
+        () => window.allCombos,
+        () => window.combo,
+        () => window.combos,
+        () => typeof allCombo !== 'undefined' ? allCombo : null,
+        () => typeof filteredCombo !== 'undefined' ? filteredCombo : null
+    ];
+    
+    const data = await window.universalExporter.getDataWithFallback(
+        comboDataSources,
+        'http://127.0.0.1:5000/api/combo/',
+        'combo'
+    );
+    
+    await window.universalExporter.exportData(data, 'combo');
+}
+
+// Invoice Export
+async function exportCurrentHoaDon() {
+    console.log('🧾 exportCurrentHoaDon called');
+    
+    const hoaDonDataSources = [
+        () => window.filteredHoaDon,
+        () => window.allHoaDon,
+        () => window.filteredHoadon,
+        () => window.allHoadon,
+        () => window.hoadon,
+        () => window.invoices,
+        () => typeof allHoaDon !== 'undefined' ? allHoaDon : null,
+        () => typeof filteredHoaDon !== 'undefined' ? filteredHoaDon : null
+    ];
+    
+    const data = await window.universalExporter.getDataWithFallback(
+        hoaDonDataSources,
+        'http://127.0.0.1:5000/api/hoadon/',
+        'hoadon'
+    );
+    
+    await window.universalExporter.exportData(data, 'hoadon');
+}
+
+// Customer Export
+async function exportCurrentKhachHang() {
+    console.log('👤 exportCurrentKhachHang called');
+    
+    const khachHangDataSources = [
+        () => window.filteredKhachHang,
+        () => window.allKhachHang,
+        () => window.filteredKhachhang,
+        () => window.allKhachhang,
+        () => window.khachhang,
+        () => window.customers,
+        () => typeof allKhachHang !== 'undefined' ? allKhachHang : null,
+        () => typeof filteredKhachHang !== 'undefined' ? filteredKhachHang : null
+    ];
+    
+    const data = await window.universalExporter.getDataWithFallback(
+        khachHangDataSources,
+        'http://127.0.0.1:5000/api/khachhang/',
+        'khachhang'
+    );
+    
+    await window.universalExporter.exportData(data, 'khachhang');
+}
+
+// Showtime Export
+async function exportCurrentSuatChieu() {
+    console.log('🎭 exportCurrentSuatChieu called');
+    
+    const suatChieuDataSources = [
+        () => window.filteredSuatChieu,
+        () => window.allSuatChieu,
+        () => window.filteredSuatchieu,
+        () => window.allSuatchieu,
+        () => window.suatchieu,
+        () => window.showtimes,
+        () => typeof allSuatChieu !== 'undefined' ? allSuatChieu : null,
+        () => typeof filteredSuatChieu !== 'undefined' ? filteredSuatChieu : null
+    ];
+    
+    const data = await window.universalExporter.getDataWithFallback(
+        suatChieuDataSources,
+        'http://127.0.0.1:5000/api/suatchieu/',
+        'suatchieu'
+    );
+    
+    await window.universalExporter.exportData(data, 'suatchieu');
+}
+
+// ============= ALIASES & LEGACY SUPPORT =============
+
+// Legacy aliases
 async function exportCurrentPhongChieu() {
     await exportCurrentRooms();
 }
 
-// Movies aliases
+// Register all export functions globally
 window.exportCurrentMovies = exportCurrentMovies;
-
-// Rooms aliases  
 window.exportCurrentRooms = exportCurrentRooms;
+window.exportCurrentCombo = exportCurrentCombo;
+window.exportCurrentHoaDon = exportCurrentHoaDon;
+window.exportCurrentKhachHang = exportCurrentKhachHang;
+window.exportCurrentSuatChieu = exportCurrentSuatChieu;
+
+// ============= GENERIC EXPORT FUNCTION =============
 
 async function exportData(dataType, customSources = null, customEndpoint = null) {
     console.log(`🔧 Generic export for: ${dataType}`);
@@ -250,17 +411,29 @@ async function exportData(dataType, customSources = null, customEndpoint = null)
 
 window.exportData = exportData;
 
+// ============= AUTO-DETECT EXPORT FUNCTION =============
+
 function autoDetectAndExport() {
-    const currentPage = window.location.pathname;
+    const currentPage = window.location.pathname.toLowerCase();
     console.log('🔍 Auto-detecting page:', currentPage);
     
     if (currentPage.includes('phim')) {
         exportCurrentMovies();
     } else if (currentPage.includes('phong')) {
         exportCurrentRooms();
+    } else if (currentPage.includes('combo')) {
+        exportCurrentCombo();
+    } else if (currentPage.includes('hoadon')) {
+        exportCurrentHoaDon();
+    } else if (currentPage.includes('khachhang')) {
+        exportCurrentKhachHang();
+    } else if (currentPage.includes('suatchieu')) {
+        exportCurrentSuatChieu();
     } else {
-        alert('Không thể tự động nhận diện loại dữ liệu để xuất');
+        alert('Không thể tự động nhận diện loại dữ liệu để xuất. Vui lòng sử dụng nút xuất cụ thể.');
     }
 }
 
 window.autoDetectAndExport = autoDetectAndExport;
+
+console.log('✅ Universal Excel Export module loaded successfully with extended support!');

@@ -215,7 +215,32 @@
     <script src="js/hoadon_api.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="js/excel_export.js"></script>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script>
+        function exportCurrentHoaDon() {
+            if (!allHoadons || allHoadons.length === 0) {
+                alert('Không có dữ liệu để xuất!');
+                return;
+            }
+
+            // Chuyển đổi dữ liệu thành định dạng phù hợp
+            const data = allHoadons.map(hd => ({
+                MaHoaDon: hd.MaHoaDon,
+                MaKH: hd.MaKH,
+                tenCombo: hd.tenCombo,
+                SoLuong:hd.SoLuong,
+                NgayMua: hd.NgayMua,
+                TongTien:hd.TongTien,
+
+            }));
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(data, { header: ['MaHoaDon','MaKH', 'tenCombo', 'SoLuong', 'NgayMua', 'TongTien'] });
+            XLSX.utils.book_append_sheet(wb, ws, 'HoaDon');
+            XLSX.writeFile(wb, 'Danh_Sach_Hoa_Don.xlsx');
+            alert('Xuất file thành công!');
+        }
+    </script>
 
 </body>
 

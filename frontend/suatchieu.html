@@ -368,6 +368,38 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/sidebar.js"></script>
     <script src="js/suatchieu_api.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="js/excel_export.js"></script>
+        <script>
+          function exportCurrentSuatChieu() {
+            if (!allShowtimes || allShowtimes.length === 0) {
+              alert('Không có dữ liệu để xuất!');
+              return;
+            }
+
+            // Chuyển đổi dữ liệu thành định dạng phù hợp
+            const data = allShowtimes.map(show => {
+              // Tìm phòng tương ứng trong allRooms dựa trên TenPhong hoặc MaPhong
+              const phong = allRooms.find(room => room.TenPhong === show.TenPhong || room.MaPhong === show.MaPhong);
+
+              return {
+                MaSuatChieu: show.MaSuatChieu,
+                TenPhong: phong ? phong.TenPhong : show.TenPhong || '',
+                MaPhong: show.MaPhong,
+                NgayChieu: show.NgayChieu,
+                GioChieu: show.GioChieu,
+                GiaVe: show.GiaVe
+              };
+            });
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(data, {
+              header: ['MaSuatChieu', 'TenPhong', 'MaPhong', 'NgayChieu', 'GioChieu', 'GiaVe']
+            });
+            XLSX.utils.book_append_sheet(wb, ws, 'SuatChieu');
+            XLSX.writeFile(wb, 'Danh_Sach_suat_chieu.xlsx');
+            alert('Xuất file thành công!');
+          }
+        </script>
   </body>
 </html>

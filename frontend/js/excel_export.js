@@ -330,28 +330,27 @@ async function exportCurrentHoaDon() {
 }
 
 // Customer Export
-async function exportCurrentKhachHang() {
-    console.log('👤 exportCurrentKhachHang called');
-    
-    const khachHangDataSources = [
-        () => window.filteredKhachHang,
-        () => window.allKhachHang,
-        () => window.filteredKhachhang,
-        () => window.allKhachhang,
-        () => window.khachhang,
-        () => window.customers,
-        () => typeof allKhachHang !== 'undefined' ? allKhachHang : null,
-        () => typeof filteredKhachHang !== 'undefined' ? filteredKhachHang : null
-    ];
-    
-    const data = await window.universalExporter.getDataWithFallback(
-        khachHangDataSources,
-        'http://127.0.0.1:5000/api/khachhang/',
-        'khachhang'
-    );
-    
-    await window.universalExporter.exportData(data, 'khachhang');
-}
+// async function exportCurrentKhachHang() {
+//     if (!allCustomers || allCustomers.length === 0) {
+//         alert('Không có dữ liệu để xuất!');
+//         return;
+//     }
+
+//     // Chuyển đổi dữ liệu thành định dạng phù hợp
+//     const data = allCustomers.map(customer => ({
+//         MaKH: customer.MaKH,
+//         TenKH: customer.TenKH,
+//         Email: customer.Email,
+//         SDT: customer.SDT
+//     }));
+
+//     const wb = XLSX.utils.book_new();
+//     const ws = XLSX.utils.json_to_sheet(data, { header: ['MaKH', 'TenKH', 'Email', 'SDT'] });
+//     XLSX.utils.book_append_sheet(wb, ws, 'KhachHang');
+//     XLSX.writeFile(wb, 'Danh_Sach_Khach_Hang.xlsx');
+//     alert('Xuất file thành công!');
+// }
+
 
 // Showtime Export
 async function exportCurrentSuatChieu() {

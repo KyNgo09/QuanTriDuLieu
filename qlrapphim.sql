@@ -531,11 +531,6 @@ DELIMITER ;
 -- - thêm suất chiếu thì thời gian chiếu phải sau thời gian hiện tại ít nhất 1 ngày
 -- - và sau thời gian của suất chiếu trước đó (cùng phòng chiếu) phải cách một khoảng thời gian là thời lượng phim + 30 phút (dọn dẹp).
 -- - và không tồn tài suất chiếu nào (cùng phòng chiếu) có thời gian chiếu trước thời gian chiếu của suất chiếu mới + thời lượng phim + 30 phút (dọn dẹp).
--- drop trigger trg_check_thoi_gian_them_suatchieu;
-
--- INSERT INTO suatchieu (MaPhim, MaPhong, NgayChieu, GioChieu, GiaVe) VALUES
--- (1, 1, '2025-07-25', '15:15:00', 80000.00);
-
 DELIMITER $$
 
 CREATE TRIGGER trg_check_thoi_gian_them_suatchieu
@@ -665,75 +660,9 @@ END$$
 
 DELIMITER ;
 
-
--- Kiểm tra ghế còn trống
-
-DELIMITER //
-
-CREATE FUNCTION KiemTraGheConTrong (p_MaSuatChieu INT) RETURNS INT
-DETERMINISTIC
-BEGIN
-    DECLARE v_TongGhe INT;
-    DECLARE v_GheDaDat INT;
-    DECLARE v_MaPhong INT;
-    
-    SELECT MaPhong INTO v_MaPhong
-    FROM suatchieu
-    WHERE MaSuatChieu = p_MaSuatChieu;
-    
-    IF v_MaPhong IS NULL THEN
-        RETURN -1;
-    END IF;
-    
-    SELECT SoGhe INTO v_TongGhe
-    FROM phongchieu
-    WHERE MaPhong = v_MaPhong;
-    
-    SELECT COUNT(*) INTO v_GheDaDat
-    FROM ve
-    WHERE MaSuatChieu = p_MaSuatChieu AND TrangThai = 'DaDat';
-    
-    IF v_GheDaDat IS NULL THEN
-        SET v_GheDaDat = 0;
-    END IF;
-    
-    RETURN GREATEST(0, v_TongGhe - v_GheDaDat);
-END //
-
 DELIMITER ;
 
--- Kiểm tra số ghế còn trống
-
--- SHOW TABLES;
--- SELECT * FROM phim;
--- SELECT KiemTraGheConTrong(1);
-
--- Tính tổng tiền combo 
-
-DELIMITER //
-
-CREATE FUNCTION TinhTongTienCombo(MaCombo INT, SoLuong INT) RETURNS DECIMAL(10,2)
-DETERMINISTIC
-BEGIN
-    DECLARE Gia DECIMAL(10,2);
-
-    SELECT GiaCombo INTO Gia
-    FROM combo
-    WHERE combo.MaCombo = MaCombo;
-
-    IF Gia IS NULL THEN
-        RETURN 0;
-    END IF;
-
-    RETURN Gia * SoLuong;
-END //
-
-DELIMITER ;
-
--- SELECT TinhTongTienCombo(1, 3);
-
--- Đếm số vé bán theo phim 
-
+-- Hàm đếm số vé đã bán theo mã phim
 DELIMITER //
 
 CREATE FUNCTION DemSoVeDaBanTheoPhim(MaPhim INT) RETURNS INT
@@ -750,10 +679,6 @@ BEGIN
 END //
 
 DELIMITER ;
-
--- SELECT DemSoVeDaBanTheoPhim(1);
-
--- STORED PROCEDURES
 
 DELIMITER //
 
@@ -785,84 +710,7 @@ END //
 
 DELIMITER ;
 
--- 2. PROCEDURE: Kiểm tra ghế trống cho một suất chiếu
--- Mục đích: Hiển thị sơ đồ ghế và trạng thái đặt
-DELIMITER //
-
-CREATE PROCEDURE sp_KiemTraGheTrong(
-    IN p_MaSuatChieu INT
-)
-BEGIN
-    SELECT 
-        g.MaGhe,
-        g.SoHang,
-        g.STTGhe,
-        g.LoaiGhe,
-        CASE 
-            WHEN v.MaVe IS NOT NULL THEN 'DaDat'
-            ELSE 'ConTrong'
-        END AS TrangThaiGhe,
-        CASE 
-            WHEN g.LoaiGhe = 'VIP' THEN sc.GiaVe * 1.15
-            ELSE sc.GiaVe
-        END AS GiaVeThucTe
-    FROM ghe g
-    INNER JOIN phongchieu pc ON g.MaPhong = pc.MaPhong
-    INNER JOIN suatchieu sc ON pc.MaPhong = sc.MaPhong
-    LEFT JOIN ve v ON g.MaGhe = v.MaGhe 
-                   AND v.MaSuatChieu = p_MaSuatChieu 
-                   AND v.TrangThai = 'DaDat'
-    WHERE sc.MaSuatChieu = p_MaSuatChieu
-    ORDER BY g.SoHang ASC, g.STTGhe ASC;
-END //
-
-DELIMITER ;
-
--- 3. PROCEDURE: Đặt vé (Transaction an toàn)
--- Mục đích: Xử lý đặt vé với kiểm tra tính hợp lệ
-DELIMITER //
-
-CREATE PROCEDURE sp_DatVe(
-    IN p_MaSuatChieu INT,
-    IN p_MaKH INT,
-    IN p_MaGhe INT,
-    OUT p_KetQua VARCHAR(255),
-    OUT p_MaVe INT
-)
-BEGIN
-    DECLARE v_Count INT DEFAULT 0;
-    DECLARE v_GiaVe DECIMAL(10,2);
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
-    BEGIN
-        ROLLBACK;
-        SET p_KetQua = 'Lỗi khi đặt vé. Vui lòng thử lại.';
-        SET p_MaVe = NULL;
-    END;   
-    START TRANSACTION;    
-    -- Kiểm tra ghế đã được đặt chưa
-    SELECT COUNT(*) INTO v_Count
-    FROM ve 
-    WHERE MaSuatChieu = p_MaSuatChieu 
-        AND MaGhe = p_MaGhe 
-        AND TrangThai = 'DaDat';       
-    IF v_Count > 0 THEN
-        SET p_KetQua = 'Ghế đã được đặt!';
-        SET p_MaVe = NULL;
-        ROLLBACK;
-    ELSE
-        -- Thêm vé mới
-        INSERT INTO ve (MaSuatChieu, MaKH, MaGhe, TrangThai)
-        VALUES (p_MaSuatChieu, p_MaKH, p_MaGhe, 'DaDat');
-        
-        SET p_MaVe = LAST_INSERT_ID();
-        SET p_KetQua = 'Đặt vé thành công!';      
-        COMMIT;
-    END IF;
-END //
-
-DELIMITER ;
-
--- 4. PROCEDURE: Báo cáo doanh thu theo ngày
+-- PROCEDURE: Báo cáo doanh thu theo ngày
 -- Mục đích: Thống kê doanh thu hàng ngày
 DELIMITER //
 
@@ -905,7 +753,7 @@ END //
 DELIMITER ;
 
 
--- 5. PROCEDURE: Báo cáo doanh thu theo phim
+-- PROCEDURE: Báo cáo doanh thu theo phim
 -- Mục đích: Xem phim nào bán chạy nhất
 DELIMITER //
 
@@ -926,68 +774,9 @@ END //
 
 DELIMITER ;
 
--- 6. PROCEDURE: Thống kê khách hàng thường xuyên
--- Mục đích: Xác định khách hàng VIP để chăm sóc
-DELIMITER //
-
-CREATE PROCEDURE sp_ThongKeKhachHangThuongXuyen(
-    IN p_SoThangGanNhat INT
-)
-BEGIN
-    SELECT 
-        kh.MaKH,
-        kh.TenKH,
-        kh.SDT,
-        kh.Email,
-        COUNT(DISTINCT h.MaHoaDon) AS SoLanMua,
-        SUM(h.TongTien) AS TongChiTieu,
-        AVG(h.TongTien) AS ChiTieuTrungBinh,
-        MAX(h.NgayMua) AS LanMuaGanNhat
-    FROM khachhang kh
-    INNER JOIN hoadon h ON kh.MaKH = h.MaKH
-    WHERE h.NgayMua >= DATE_SUB(NOW(), INTERVAL p_SoThangGanNhat MONTH)
-    GROUP BY kh.MaKH, kh.TenKH, kh.SDT, kh.Email
-    HAVING SoLanMua >= 3  -- Khách hàng mua ít nhất 3 lần
-    ORDER BY TongChiTieu DESC;
-END //
-
 DELIMITER ;
 
--- 7. PROCEDURE: Tạo hóa đơn tự động
--- Mục đích: Tạo hóa đơn khi khách hàng thanh toán
-DELIMITER //
-
-CREATE PROCEDURE sp_TaoHoaDon(
-    IN p_MaKH INT,
-    IN p_MaVe INT,
-    IN p_MaCombo INT,
-    IN p_SoLuongCombo INT,
-    OUT p_MaHoaDon INT,
-    OUT p_TongTien DECIMAL(10,2)
-)
-BEGIN
-    DECLARE v_GiaVe DECIMAL(10,2) DEFAULT 0;
-    DECLARE v_TienCombo DECIMAL(10,2) DEFAULT 0; 
-    -- Lấy giá vé
-    SELECT GiaVe INTO v_GiaVe
-    FROM ve 
-    WHERE MaVe = p_MaVe; 
-    -- Tính tiền combo nếu có
-    IF p_MaCombo IS NOT NULL AND p_SoLuongCombo > 0 THEN
-        SET v_TienCombo = TinhTongTienCombo(p_MaCombo, p_SoLuongCombo);
-    END IF; 
-    -- Tính tổng tiền
-    SET p_TongTien = v_GiaVe + v_TienCombo; 
-    -- Tạo hóa đơn
-    INSERT INTO hoadon (MaKH, MaVe, MaCombo, SoLuong, NgayMua, TongTien)
-    VALUES (p_MaKH, p_MaVe, p_MaCombo, p_SoLuongCombo, NOW(), p_TongTien);
-    
-    SET p_MaHoaDon = LAST_INSERT_ID();
-END //
-
-DELIMITER ;
-
--- 8. PROCEDURE: Lấy lịch chiếu đầy đủ theo ngày
+-- PROCEDURE: Lấy lịch chiếu đầy đủ theo ngày
 -- Mục đích: Hiển thị toàn bộ lịch chiếu của rạp trong ngày
 DELIMITER //
 
@@ -1012,68 +801,6 @@ BEGIN
     INNER JOIN phongchieu pc ON sc.MaPhong = pc.MaPhong
     WHERE sc.NgayChieu = p_NgayChieu
     ORDER BY sc.GioChieu ASC, pc.TenPhong ASC;
-END //
-
-DELIMITER ;
-
--- 9. PROCEDURE: Hủy vé
--- Mục đích: Xử lý hủy vé trước giờ chiếu
-DELIMITER //
-
-CREATE PROCEDURE sp_HuyVe(
-    IN p_MaVe INT,
-    OUT p_KetQua VARCHAR(255)
-)
-BEGIN
-    DECLARE v_NgayChieu DATE;
-    DECLARE v_GioChieu TIME;
-    DECLARE v_ThoiGianChieu DATETIME;  
-    -- Lấy thông tin suất chiếu
-    SELECT sc.NgayChieu, sc.GioChieu
-    INTO v_NgayChieu, v_GioChieu
-    FROM ve v
-    INNER JOIN suatchieu sc ON v.MaSuatChieu = sc.MaSuatChieu
-    WHERE v.MaVe = p_MaVe;
-    
-    SET v_ThoiGianChieu = TIMESTAMP(v_NgayChieu, v_GioChieu);   
-    -- Kiểm tra thời gian hủy (trước 30 phút)
-    IF NOW() >= (v_ThoiGianChieu - INTERVAL 30 MINUTE) THEN
-        SET p_KetQua = 'Không thể hủy vé sau 30 phút trước giờ chiếu!';
-    ELSE
-        UPDATE ve 
-        SET TrangThai = 'DaHuy'
-        WHERE MaVe = p_MaVe;
-        
-        SET p_KetQua = 'Hủy vé thành công!';
-    END IF;
-END //
-
-DELIMITER ;
-
--- 10. PROCEDURE: Thống kê hiệu suất phòng chiếu
--- Mục đích: Đánh giá tỷ lệ lấp đầy của các phòng chiếu
-DELIMITER //
-
-CREATE PROCEDURE sp_ThongKeHieuSuatPhongChieu(
-    IN p_NgayBatDau DATE,
-    IN p_NgayKetThuc DATE
-)
-BEGIN
-    SELECT 
-        pc.MaPhong,
-        pc.TenPhong,
-        pc.LoaiPhong,
-        pc.SoGhe,
-        COUNT(DISTINCT sc.MaSuatChieu) AS SoSuatChieu,
-        COUNT(v.MaVe) AS TongVeBan,
-        (COUNT(DISTINCT sc.MaSuatChieu) * pc.SoGhe) AS TongChoNgoi,
-        ROUND((COUNT(v.MaVe) * 100.0) / (COUNT(DISTINCT sc.MaSuatChieu) * pc.SoGhe), 2) AS TyLeLapDay
-    FROM phongchieu pc
-    INNER JOIN suatchieu sc ON pc.MaPhong = sc.MaPhong
-    LEFT JOIN ve v ON sc.MaSuatChieu = v.MaSuatChieu AND v.TrangThai = 'DaDat'
-    WHERE sc.NgayChieu BETWEEN p_NgayBatDau AND p_NgayKetThuc
-    GROUP BY pc.MaPhong, pc.TenPhong, pc.LoaiPhong, pc.SoGhe
-    ORDER BY TyLeLapDay DESC;
 END //
 
 DELIMITER ;

@@ -30,18 +30,22 @@
               Quản Lý Vé
             </h1>
             <p class="ultra-header-subtitle">
-              Quản lý các vé đặt chỗ và lịch chiếu của khách hàng một cách hiệu quả.
+              Quản lý các vé đặt chỗ và lịch chiếu của khách hàng một cách hiệu
+              quả.
             </p>
-          </div >
-          <button class="ultra-btn ultra-btn-primary" onclick="exportCurrentVe()" title="Xuất Excel">
+          </div>
+          <button
+            class="ultra-btn ultra-btn-primary"
+            onclick="exportCurrentVe()"
+            title="Xuất Excel"
+          >
             <i class="fas fa-file-excel me-2"></i>Xuất Excel
           </button>
           <button
             class="ultra-btn ultra-btn-primary"
             data-bs-toggle="modal"
             data-bs-target="#ticketAddModal"
-            
-            style="margin-left: 10px;"
+            style="margin-left: 10px"
           >
             <i class="fas fa-plus me-2"></i>Thêm vé mới
           </button>
@@ -217,7 +221,13 @@
                     <label for="hangGhe" class="ultra-form-label">
                       <i class="fas fa-envelope me-2"></i>Hàng Ghế
                     </label>
-                    <input type="text" class="ultra-form-control" id="hangGhe" required placeholder="Nhập hàng ghế" />
+                    <input
+                      type="text"
+                      class="ultra-form-control"
+                      id="hangGhe"
+                      required
+                      placeholder="Nhập hàng ghế"
+                    />
                   </div>
                 </div>
                 <div class="col-md-12">
@@ -225,7 +235,13 @@
                     <label for="maGhe" class="ultra-form-label">
                       <i class="fas fa-chair me-2"></i>Mã ghế
                     </label>
-                    <input type="number" class="ultra-form-control" id="maGhe" required placeholder="Nhập mã ghế" />
+                    <input
+                      type="number"
+                      class="ultra-form-control"
+                      id="maGhe"
+                      required
+                      placeholder="Nhập mã ghế"
+                    />
                   </div>
                 </div>
                 <div class="col-md-12">
@@ -233,7 +249,13 @@
                     <label for="giaVe" class="ultra-form-label">
                       <i class="fas fa-money-bill me-2"></i>Giá Vé
                     </label>
-                    <input type="number" class="ultra-form-control" id="giaVe" required placeholder="Nhập giá vé" />
+                    <input
+                      type="number"
+                      class="ultra-form-control"
+                      id="giaVe"
+                      required
+                      placeholder="Nhập giá vé"
+                    />
                   </div>
                 </div>
               </div>
@@ -266,7 +288,11 @@
             <h5 class="modal-title" id="ticketModalTitle">
               <i class="fas fa-plus-circle me-3"></i>Thêm Vé Mới
             </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
           </div>
           <div class="modal-body">
             <form id="ticketForm">
@@ -276,8 +302,13 @@
                     <label for="addTenKH" class="ultra-form-label">
                       <i class="fas fa-user me-2"></i>Tên Khách Hàng
                     </label>
-                    <input type="text" class="ultra-form-control" id="addTenKH" required
-                      placeholder="Nhập tên khách hàng" />
+                    <input
+                      type="text"
+                      class="ultra-form-control"
+                      id="addTenKH"
+                      required
+                      placeholder="Nhập tên khách hàng"
+                    />
                   </div>
                 </div>
                 <div class="col-md-12">
@@ -285,7 +316,11 @@
                     <label for="addMaSuatChieu" class="ultra-form-label">
                       <i class="fas fa-clock me-2"></i>Mã Suất Chiếu
                     </label>
-                    <select class="ultra-form-control" id="addMaSuatChieu" required>
+                    <select
+                      class="ultra-form-control"
+                      id="addMaSuatChieu"
+                      required
+                    >
                       <option value="">-- Chọn suất chiếu --</option>
                     </select>
                   </div>
@@ -304,10 +339,18 @@
             </form>
           </div>
           <div class="modal-footer">
-            <button type="button" class="ultra-btn ultra-btn-secondary" data-bs-dismiss="modal">
+            <button
+              type="button"
+              class="ultra-btn ultra-btn-secondary"
+              data-bs-dismiss="modal"
+            >
               <i class="fas fa-times me-2"></i>Hủy
             </button>
-            <button type="button" class="ultra-btn ultra-btn-primary" onclick="addNewTicket()">
+            <button
+              type="button"
+              class="ultra-btn ultra-btn-primary"
+              onclick="addNewTicket()"
+            >
               <i class="fas fa-save me-2"></i>Thêm Vé
             </button>
           </div>
@@ -324,24 +367,27 @@
     <script>
       function exportCurrentVe() {
         if (!allTickets || allTickets.length === 0) {
-          alert('Không có dữ liệu để xuất!');
+          alert("Không có dữ liệu để xuất!");
           return;
-        } 
+        }
+
+        console.log(allTickets);
 
         // Chuyển đổi dữ liệu thành định dạng phù hợp
-        const data = allTickets.map(ve => ({
+        const data = allTickets.map((ve) => ({
           MaVe: ve.MaVe,
-          tenKhachHang: ve.tenKhachHang,
-          maGhe: ve.maGhe,
+          MaKH: ve.MaKH,
+          MaGhe: ve.MaGhe,
           GiaVe: ve.GiaVe,
-
         }));
 
         const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(data, { header: ['MaVe', 'tenKhachHang', 'maGhe', 'GiaVe'] });
-        XLSX.utils.book_append_sheet(wb, ws, 'Ve');
-        XLSX.writeFile(wb, 'Danh_Sach_Ve.xlsx');
-        alert('Xuất file thành công!');
+        const ws = XLSX.utils.json_to_sheet(data, {
+          header: ["MaVe", "MaKH", "MaGhe", "GiaVe"],
+        });
+        XLSX.utils.book_append_sheet(wb, ws, "Ve");
+        XLSX.writeFile(wb, "Danh_Sach_Ve.xlsx");
+        alert("Xuất file thành công!");
       }
     </script>
   </body>

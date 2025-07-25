@@ -149,7 +149,7 @@ async function loadSuatChieuOptions() {
 
   try {
     const token = VeAPI.getToken();
-    const res = await fetch("http://127.0.0.1:5000/api/suatchieu", {
+    const res = await fetch("http://127.0.0.1:5000/api/suatchieu/", {
       headers: {
         Authorization: `Bearer ${token}`,
       },

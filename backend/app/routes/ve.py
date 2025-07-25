@@ -63,8 +63,8 @@ def create_ve():
     ma_suat_chieu = data.get('MaSuatChieu')
     ma_kh = data.get('MaKH')
     ma_ghe = data.get('MaGhe')
-    gia_ve = data.get('GiaVe') # Có thể null -> mysql có trigger để tự động tính giá
-    trang_thai = data.get('TrangThai', 'DaDat')  # Default: DaDat
+    # gia_ve = data.get('GiaVe') # Có thể null -> mysql có trigger để tự động tính giá
+    # trang_thai = data.get('TrangThai', 'DaDat')  # Default: DaDat
 
     conn = None
     cursor = None
@@ -75,8 +75,8 @@ def create_ve():
         # Nếu không có ngày đặt, sử dụng CURRENT_TIMESTAMP
         cursor.execute("""
             INSERT INTO ve (MaSuatChieu, MaKH, MaGhe, GiaVe, TrangThai)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (ma_suat_chieu, ma_kh, ma_ghe, gia_ve, trang_thai))
+            VALUES (%s, %s, %s)
+        """, (ma_suat_chieu, ma_kh, ma_ghe))
         
         # Lấy ID của vé vừa được thêm
         ma_ve_moi = cursor.lastrowid

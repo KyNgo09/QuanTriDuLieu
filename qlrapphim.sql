@@ -41,7 +41,13 @@ CREATE TABLE `combo` (
 
 LOCK TABLES `combo` WRITE;
 /*!40000 ALTER TABLE `combo` DISABLE KEYS */;
-INSERT INTO `combo` VALUES (1,'Bắp + Nước 1 người',45000.00,'1 bắp ngọt + 1 Pepsi'),(2,'Combo đôi',80000.00,'2 bắp + 2 nước');
+INSERT INTO combo (MaCombo, TenCombo, GiaCombo, MoTa) VALUES
+(1, 'Bắp + Nước 1 người', 45000.00, '1 bắp ngọt + 1 Pepsi'),
+(2, 'Combo đôi', 80000.00, '2 bắp + 2 nước'),
+(3, 'Combo Gia đình', 120000.00, '3 bắp lớn + 3 nước + 1 snack'),
+(4, 'Combo Trẻ em', 35000.00, '1 bắp nhỏ + 1 nước trái cây'),
+(5, 'Combo VIP', 150000.00, '2 bắp caramel + 2 nước + 2 hotdog');
+
 /*!40000 ALTER TABLE `combo` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -74,7 +80,14 @@ CREATE TABLE `hoadon` (
 
 LOCK TABLES `hoadon` WRITE;
 /*!40000 ALTER TABLE `hoadon` DISABLE KEYS */;
-INSERT INTO `hoadon` VALUES (1,1,1,1,'2025-07-09 20:34:26',105000.00),(2,1,2,2,'2025-07-09 20:34:26',250000.00),(3,2,3,1,'2025-07-09 20:34:26',105000.00);
+INSERT INTO hoadon (MaKH, MaCombo, SoLuong)
+VALUES
+(1, 1, 1),
+(1, 2, 2),
+(2, 1, 1),
+(3, 3, 2),
+(4, 5, 1);
+
 /*!40000 ALTER TABLE `hoadon` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -100,7 +113,18 @@ CREATE TABLE `khachhang` (
 
 LOCK TABLES `khachhang` WRITE;
 /*!40000 ALTER TABLE `khachhang` DISABLE KEYS */;
-INSERT INTO `khachhang` VALUES (1,'Nguyen Van A','0901234567','a@gmail.com'),(2,'Tran Thi B','0909876543','b@yahoo.com');
+INSERT INTO khachhang (TenKH, SDT, Email) VALUES
+('Le Van C', '0912345678', 'c@example.com'),
+('Pham Thi D', '0987654321', 'd@example.com'),
+('Nguyen Van E', '0901112233', 'e@example.com'),
+('Tran Thi F', '0903123456', 'f@example.com'),
+('Hoang Van G', '0911456789', 'g@example.com'),
+('Do Thi H', '0932456789', 'h@example.com'),
+('Nguyen Van I', '0943567890', 'i@example.com'),
+('Pham Minh J', '0954678901', 'j@example.com'),
+('Vo Thi K', '0965789012', 'k@example.com'),
+('Bui Van L', '0976890123', 'l@example.com');
+
 /*!40000 ALTER TABLE `khachhang` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -129,7 +153,13 @@ CREATE TABLE `phim` (
 
 LOCK TABLES `phim` WRITE;
 /*!40000 ALTER TABLE `phim` DISABLE KEYS */;
-INSERT INTO `phim` VALUES (1,'Avengers: Endgame','Hành động','Anthony Russo',180,'2025-07-20','T13'),(2,'Inside Out 2','Hoạt hình','Kelsey Mann',100,'2025-06-15',6);
+INSERT INTO phim (MaPhim, TenPhim, TheLoai, DaoDien, ThoiLuong, NgayKhoiChieu, DoTuoiChoPhep) VALUES
+(1, 'Avengers: Endgame', 'Hành động', 'Anthony Russo', 180, '2025-07-20', 13),
+(2, 'Inside Out 2', 'Hoạt hình', 'Kelsey Mann', 100, '2025-06-15', 6),
+(3, 'Oppenheimer', 'Chính kịch', 'Christopher Nolan', 180, '2025-07-10', 16),
+(4, 'Kung Fu Panda 4', 'Hoạt hình', 'Mike Mitchell', 95, '2025-07-18', 6),
+(5, 'John Wick 4', 'Hành động', 'Chad Stahelski', 169, '2025-07-12', 18);
+
 /*!40000 ALTER TABLE `phim` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -155,7 +185,14 @@ CREATE TABLE `phongchieu` (
 
 LOCK TABLES `phongchieu` WRITE;
 /*!40000 ALTER TABLE `phongchieu` DISABLE KEYS */;
-INSERT INTO `phongchieu` VALUES (1,'Phòng 2D - A',0,'2D'),(2,'Phòng 3D - B',0,'3D');
+-- 5 phòng chiếu (phòng 1 và 2 đã có, thêm phòng 3 đến 5)
+INSERT INTO phongchieu (MaPhong, TenPhong, SoGhe, LoaiPhong) VALUES
+(1, 'Phòng 2D - A', 0, '2D'),
+(2, 'Phòng 3D - B', 0, '3D'),
+(3, 'Phòng 2D - C', 0, '2D'),
+(4, 'Phòng 3D - D', 0, '3D'),
+(5, 'Phòng 4D - E', 0, 'IMAX');
+
 /*!40000 ALTER TABLE `phongchieu` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -225,7 +262,87 @@ DELIMITER ;
 
 LOCK TABLES `ghe` WRITE;
 /*!40000 ALTER TABLE `ghe` DISABLE KEYS */;
-INSERT INTO `ghe` VALUES (1,1,'A',1,'THUONG'),(2,1,'A',2,'THUONG'),(3,1,'A',3,'THUONG'),(4,1,'A',4,'VIP'),(5,1,'A',5,'VIP'),(6,1,'A',6,'VIP'),(7,2,'A',1,'THUONG'),(8,2,'A',2,'THUONG'),(9,2,'A',3,'THUONG'),(10,2,'A',4,'VIP'),(11,2,'A',5,'VIP'),(12,2,'A',6,'VIP');
+-- ====== Phòng 1: 15 ghế ======
+INSERT INTO ghe (MaPhong, SoHang, STTGhe, LoaiGhe) VALUES
+(1, 'A', 1, 'THUONG'), (1, 'A', 2, 'THUONG'), (1, 'A', 3, 'THUONG'),
+(1, 'A', 4, 'THUONG'), (1, 'A', 5, 'THUONG'), (1, 'A', 6, 'THUONG'),
+(1, 'A', 7, 'THUONG'), (1, 'A', 8, 'THUONG'), (1, 'A', 9, 'VIP'),
+(1, 'A',10, 'VIP'),    (1, 'B', 1, 'THUONG'), (1, 'B', 2, 'THUONG'),
+(1, 'B', 3, 'VIP'),    (1, 'B', 4, 'VIP'),    (1, 'B', 5, 'VIP');
+
+-- ====== Phòng 2: 15 ghế ======
+INSERT INTO ghe (MaPhong, SoHang, STTGhe, LoaiGhe) VALUES
+(2, 'A', 1, 'THUONG'), (2, 'A', 2, 'THUONG'), (2, 'A', 3, 'THUONG'),
+(2, 'A', 4, 'THUONG'), (2, 'A', 5, 'THUONG'), (2, 'A', 6, 'THUONG'),
+(2, 'A', 7, 'THUONG'), (2, 'A', 8, 'THUONG'), (2, 'A', 9, 'VIP'),
+(2, 'A',10, 'VIP'),    (2, 'B', 1, 'THUONG'), (2, 'B', 2, 'THUONG'),
+(2, 'B', 3, 'VIP'),    (2, 'B', 4, 'VIP'),    (2, 'B', 5, 'VIP');
+
+-- ====== Phòng 3: 30 ghế ======
+INSERT INTO ghe (MaPhong, SoHang, STTGhe, LoaiGhe) VALUES
+(3, 'A', 1, 'THUONG'), (3, 'A', 2, 'THUONG'), (3, 'A', 3, 'THUONG'),
+(3, 'A', 4, 'THUONG'), (3, 'A', 5, 'THUONG'), (3, 'A', 6, 'THUONG'),
+(3, 'A', 7, 'THUONG'), (3, 'A', 8, 'THUONG'), (3, 'A', 9, 'VIP'),
+(3, 'A',10, 'VIP'),
+(3, 'B', 1, 'THUONG'), (3, 'B', 2, 'THUONG'), (3, 'B', 3, 'THUONG'),
+(3, 'B', 4, 'THUONG'), (3, 'B', 5, 'THUONG'), (3, 'B', 6, 'THUONG'),
+(3, 'B', 7, 'VIP'),    (3, 'B', 8, 'VIP'),    (3, 'B', 9, 'VIP'),
+(3, 'B',10, 'VIP'),
+(3, 'C', 1, 'THUONG'), (3, 'C', 2, 'THUONG'), (3, 'C', 3, 'THUONG'),
+(3, 'C', 4, 'THUONG'), (3, 'C', 5, 'THUONG'), (3, 'C', 6, 'VIP'),
+(3, 'C', 7, 'VIP'),    (3, 'C', 8, 'VIP'),    (3, 'C', 9, 'VIP'),
+(3, 'C',10, 'VIP');
+
+-- ====== Phòng 4: 30 ghế ======
+-- Dùng cùng logic như phòng 3
+INSERT INTO ghe (MaPhong, SoHang, STTGhe, LoaiGhe) VALUES
+(4, 'A', 1, 'THUONG'), (4, 'A', 2, 'THUONG'), (4, 'A', 3, 'THUONG'),
+(4, 'A', 4, 'THUONG'), (4, 'A', 5, 'THUONG'), (4, 'A', 6, 'THUONG'),
+(4, 'A', 7, 'THUONG'), (4, 'A', 8, 'THUONG'), (4, 'A', 9, 'VIP'),
+(4, 'A',10, 'VIP'),
+(4, 'B', 1, 'THUONG'), (4, 'B', 2, 'THUONG'), (4, 'B', 3, 'THUONG'),
+(4, 'B', 4, 'THUONG'), (4, 'B', 5, 'THUONG'), (4, 'B', 6, 'THUONG'),
+(4, 'B', 7, 'VIP'),    (4, 'B', 8, 'VIP'),    (4, 'B', 9, 'VIP'),
+(4, 'B',10, 'VIP'),
+(4, 'C', 1, 'THUONG'), (4, 'C', 2, 'THUONG'), (4, 'C', 3, 'THUONG'),
+(4, 'C', 4, 'THUONG'), (4, 'C', 5, 'THUONG'), (4, 'C', 6, 'VIP'),
+(4, 'C', 7, 'VIP'),    (4, 'C', 8, 'VIP'),    (4, 'C', 9, 'VIP'),
+(4, 'C',10, 'VIP');
+
+-- ====== Phòng 5: 60 ghế ======
+-- 6 hàng A → F, mỗi hàng 10 ghế
+INSERT INTO ghe (MaPhong, SoHang, STTGhe, LoaiGhe) VALUES
+-- Hàng A
+(5, 'A', 1, 'THUONG'), (5, 'A', 2, 'THUONG'), (5, 'A', 3, 'THUONG'),
+(5, 'A', 4, 'THUONG'), (5, 'A', 5, 'THUONG'), (5, 'A', 6, 'THUONG'),
+(5, 'A', 7, 'THUONG'), (5, 'A', 8, 'THUONG'), (5, 'A', 9, 'VIP'),
+(5, 'A',10, 'VIP'),
+-- Hàng B
+(5, 'B', 1, 'THUONG'), (5, 'B', 2, 'THUONG'), (5, 'B', 3, 'THUONG'),
+(5, 'B', 4, 'THUONG'), (5, 'B', 5, 'THUONG'), (5, 'B', 6, 'THUONG'),
+(5, 'B', 7, 'THUONG'), (5, 'B', 8, 'VIP'),    (5, 'B', 9, 'VIP'),
+(5, 'B',10, 'VIP'),
+-- Hàng C
+(5, 'C', 1, 'THUONG'), (5, 'C', 2, 'THUONG'), (5, 'C', 3, 'THUONG'),
+(5, 'C', 4, 'THUONG'), (5, 'C', 5, 'THUONG'), (5, 'C', 6, 'THUONG'),
+(5, 'C', 7, 'VIP'),    (5, 'C', 8, 'VIP'),    (5, 'C', 9, 'VIP'),
+(5, 'C',10, 'VIP'),
+-- Hàng D
+(5, 'D', 1, 'THUONG'), (5, 'D', 2, 'THUONG'), (5, 'D', 3, 'THUONG'),
+(5, 'D', 4, 'THUONG'), (5, 'D', 5, 'THUONG'), (5, 'D', 6, 'THUONG'),
+(5, 'D', 7, 'VIP'),    (5, 'D', 8, 'VIP'),    (5, 'D', 9, 'VIP'),
+(5, 'D',10, 'VIP'),
+-- Hàng E
+(5, 'E', 1, 'THUONG'), (5, 'E', 2, 'THUONG'), (5, 'E', 3, 'THUONG'),
+(5, 'E', 4, 'THUONG'), (5, 'E', 5, 'THUONG'), (5, 'E', 6, 'THUONG'),
+(5, 'E', 7, 'VIP'),    (5, 'E', 8, 'VIP'),    (5, 'E', 9, 'VIP'),
+(5, 'E',10, 'VIP'),
+-- Hàng F
+(5, 'F', 1, 'THUONG'), (5, 'F', 2, 'THUONG'), (5, 'F', 3, 'THUONG'),
+(5, 'F', 4, 'THUONG'), (5, 'F', 5, 'THUONG'), (5, 'F', 6, 'THUONG'),
+(5, 'F', 7, 'VIP'),    (5, 'F', 8, 'VIP'),    (5, 'F', 9, 'VIP'),
+(5, 'F',10, 'VIP');
+
 /*!40000 ALTER TABLE `ghe` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -257,7 +374,36 @@ CREATE TABLE `suatchieu` (
 
 LOCK TABLES `suatchieu` WRITE;
 /*!40000 ALTER TABLE `suatchieu` DISABLE KEYS */;
-INSERT INTO `suatchieu` VALUES (1,1,1,'2025-07-21','18:30:00', 60000.00),(2,2,2,'2025-07-21','20:00:00', 60000.00);
+-- Phim 1: Avengers: Endgame
+INSERT INTO suatchieu (MaPhim, MaPhong, NgayChieu, GioChieu, GiaVe) VALUES
+(1, 1, '2025-07-21', '10:00:00', 60000.00),
+(1, 2, '2025-07-22', '15:00:00', 65000.00),
+(1, 3, '2025-07-23', '20:00:00', 65000.00);
+
+-- Phim 2: Inside Out 2
+INSERT INTO suatchieu (MaPhim, MaPhong, NgayChieu, GioChieu, GiaVe) VALUES
+(2, 2, '2025-07-21', '10:00:00', 60000.00),
+(2, 3, '2025-07-22', '15:00:00', 60000.00),
+(2, 4, '2025-07-23', '20:00:00', 60000.00);
+
+-- Phim 3: Oppenheimer
+INSERT INTO suatchieu (MaPhim, MaPhong, NgayChieu, GioChieu, GiaVe) VALUES
+(3, 3, '2025-07-22', '10:00:00', 70000.00),
+(3, 4, '2025-07-23', '15:00:00', 70000.00),
+(3, 5, '2025-07-24', '20:00:00', 70000.00);
+
+-- Phim 4: Kung Fu Panda 4
+INSERT INTO suatchieu (MaPhim, MaPhong, NgayChieu, GioChieu, GiaVe) VALUES
+(4, 1, '2025-07-22', '10:00:00', 60000.00),
+(4, 2, '2025-07-23', '15:00:00', 60000.00),
+(4, 3, '2025-07-24', '20:00:00', 60000.00);
+
+-- Phim 5: John Wick 4
+INSERT INTO suatchieu (MaPhim, MaPhong, NgayChieu, GioChieu, GiaVe) VALUES
+(5, 2, '2025-07-23', '10:00:00', 65000.00),
+(5, 4, '2025-07-24', '15:00:00', 65000.00),
+(5, 5, '2025-07-25', '20:00:00', 65000.00);
+
 /*!40000 ALTER TABLE `suatchieu` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -277,6 +423,7 @@ CREATE TABLE `ve` (
   `GiaVe` decimal(10,2) DEFAULT NULL,
   `TrangThai` enum('DaDat','DaSuDung','DaHuy') DEFAULT 'DaDat',
   PRIMARY KEY (`MaVe`),
+  UNIQUE KEY `uniq_suatchieu_ghe` (`MaSuatChieu`, `MaGhe`),
   KEY `MaSuatChieu` (`MaSuatChieu`),
   KEY `MaKH` (`MaKH`),
   KEY `MaGhe` (`MaGhe`),
@@ -292,7 +439,19 @@ CREATE TABLE `ve` (
 
 LOCK TABLES `ve` WRITE;
 /*!40000 ALTER TABLE `ve` DISABLE KEYS */;
-INSERT INTO `ve` VALUES (1,1,1,1,'2025-07-09 20:34:22',60000.00,'DaDat'),(2,1,1,4,'2025-07-09 20:34:22',90000.00,'DaDat'),(3,2,2,7,'2025-07-09 20:34:22',60000.00,'DaDat');
+INSERT INTO ve (MaSuatChieu, MaKH, MaGhe, GiaVe, TrangThai)
+VALUES
+(1, 1, 1, 60000.00, 'DaDat'),
+(1, 2, 2, 60000.00, 'DaDat'),
+(2, 3, 4, 60000.00, 'DaDat'),
+(3, 4, 7, 60000.00, 'DaDat'),
+(4, 5, 8, 60000.00, 'DaDat'),
+(5, 6, 9, 60000.00, 'DaDat'),
+(6, 7, 10, 60000.00, 'DaDat'),
+(7, 8, 11, 60000.00, 'DaDat'),
+(8, 9, 12, 60000.00, 'DaDat'),
+(9,10, 13, 60000.00, 'DaDat');
+
 /*!40000 ALTER TABLE `ve` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -363,6 +522,63 @@ BEGIN
         SET NEW.NgayDat = NOW();
         
     END IF;
+END$$
+
+DELIMITER ;
+
+
+-- Trigger kiểm tra tính hợp lệ của thời gian khi thêm suất chiếu
+-- - thêm suất chiếu thì thời gian chiếu phải sau thời gian hiện tại ít nhất 1 ngày
+-- - và sau thời gian của suất chiếu trước đó (cùng phòng chiếu) phải cách một khoảng thời gian là thời lượng phim + 30 phút (dọn dẹp).
+-- - và không tồn tài suất chiếu nào (cùng phòng chiếu) có thời gian chiếu trước thời gian chiếu của suất chiếu mới + thời lượng phim + 30 phút (dọn dẹp).
+DELIMITER $$
+
+CREATE TRIGGER trg_check_thoi_gian_them_suatchieu
+BEFORE INSERT ON suatchieu
+FOR EACH ROW
+BEGIN
+    DECLARE v_ThoiGianChieu DATETIME;
+    DECLARE v_ThoiGianTruoc DATETIME;
+    DECLARE v_ThoiGianSau DATETIME;
+    DECLARE v_ThoiGianHienTai DATETIME;
+
+    SET v_ThoiGianHienTai = NOW();
+
+    -- Kiểm tra thời gian chiếu phải sau thời gian hiện tại ít nhất 1 ngày
+    IF NEW.NgayChieu < DATE_ADD(v_ThoiGianHienTai, INTERVAL 1 DAY) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'NgayChieu phai sau thoi gian hien tai it nhat 1 ngay.';
+    END IF;
+
+    -- Tính thời gian chiếu
+    SET v_ThoiGianChieu = TIMESTAMP(NEW.NgayChieu, NEW.GioChieu);
+    
+    -- Lấy suất chiếu trước đó cùng phòng + thời lượng phim tương ứng + 30 phút
+    SELECT MAX(DATE_ADD(TIMESTAMP(NgayChieu, GioChieu), INTERVAL (SELECT ThoiLuong FROM phim WHERE MaPhim = NEW.MaPhim) + 30 MINUTE))
+    INTO v_ThoiGianTruoc
+    FROM suatchieu
+    WHERE MaPhim = NEW.MaPhim;
+
+    -- Nếu không có suất chiếu trước đó, thì v_ThoiGianTruoc sẽ là NULL
+    IF v_ThoiGianTruoc IS NULL THEN
+        SET v_ThoiGianTruoc = '1970-01-01 00:00:00'; -- Giá trị mặc định nếu không có suất chiếu trước đó
+    END IF;
+
+    -- Tính thời gian sau (thời gian chiếu + thời lượng + 30 phút dọn dẹp)
+    SET v_ThoiGianSau = DATE_ADD(v_ThoiGianChieu, INTERVAL (SELECT ThoiLuong FROM phim WHERE MaPhim = NEW.MaPhim) + 30 MINUTE);
+
+    -- Kiểm tra không có suất chiếu nào (cùng phòng) có thời gian chiếu trước thời gian chiếu mới + thời lượng phim + 30 phút
+    IF EXISTS (
+        SELECT 1
+        FROM suatchieu
+        WHERE MaPhong = NEW.MaPhong
+        AND TIMESTAMP(NgayChieu, GioChieu) < v_ThoiGianChieu
+        AND TIMESTAMP(NgayChieu, GioChieu) >= v_ThoiGianTruoc
+        AND TIMESTAMP(NgayChieu, GioChieu) < v_ThoiGianSau
+    ) THEN
+        SIGNAL SQLSTATE '45000';
+	END IF;
+
 END$$
 
 DELIMITER ;

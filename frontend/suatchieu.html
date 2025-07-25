@@ -32,8 +32,12 @@
             <p class="ultra-header-subtitle">
               Quản lý lịch chiếu phim trong rạp
             </p>
-          </div >
-          <button class="ultra-btn ultra-btn-primary" onclick="exportCurrentSuatChieu()" title="Xuất Excel">
+          </div>
+          <button
+            class="ultra-btn ultra-btn-primary"
+            onclick="exportCurrentSuatChieu()"
+            title="Xuất Excel"
+          >
             <i class="fas fa-file-excel me-2"></i>Xuất Excel
           </button>
           <button
@@ -41,7 +45,7 @@
             data-bs-toggle="modal"
             data-bs-target="#suatChieuModal"
             onclick="openAddModal()"
-            style="margin-left: 10px;"
+            style="margin-left: 10px"
           >
             <i class="fas fa-plus me-2"></i>Thêm Suất Chiếu
           </button>
@@ -370,36 +374,47 @@
     <script src="js/suatchieu_api.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="js/excel_export.js"></script>
-        <script>
-          function exportCurrentSuatChieu() {
-            if (!allShowtimes || allShowtimes.length === 0) {
-              alert('Không có dữ liệu để xuất!');
-              return;
-            }
+    <script>
+      function exportCurrentSuatChieu() {
+        if (!allShowtimes || allShowtimes.length === 0) {
+          alert("Không có dữ liệu để xuất!");
+          return;
+        }
 
-            // Chuyển đổi dữ liệu thành định dạng phù hợp
-            const data = allShowtimes.map(show => {
-              // Tìm phòng tương ứng trong allRooms dựa trên TenPhong hoặc MaPhong
-              const phong = allRooms.find(room => room.TenPhong === show.TenPhong || room.MaPhong === show.MaPhong);
+        // Chuyển đổi dữ liệu thành định dạng phù hợp
+        const data = allShowtimes.map((show) => {
+          // Tìm phòng tương ứng trong allRooms dựa trên TenPhong hoặc MaPhong
+          const phong = allRooms.find(
+            (room) =>
+              room.TenPhong === show.Phong.TenPhong ||
+              room.MaPhong === show.Phong.MaPhong
+          );
 
-              return {
-                MaSuatChieu: show.MaSuatChieu,
-                TenPhong: phong ? phong.TenPhong : show.TenPhong || '',
-                MaPhong: show.MaPhong,
-                NgayChieu: show.NgayChieu,
-                GioChieu: show.GioChieu,
-                GiaVe: show.GiaVe
-              };
-            });
+          return {
+            MaSuatChieu: show.MaSuatChieu,
+            TenPhong: phong ? phong.TenPhong : show.Phong.TenPhong || "",
+            MaPhong: phong ? phong.MaPhong : show.Phong.MaPhong || "",
+            NgayChieu: show.NgayChieu,
+            GioChieu: show.GioChieu,
+            GiaVe: show.GiaVe,
+          };
+        });
 
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.json_to_sheet(data, {
-              header: ['MaSuatChieu', 'TenPhong', 'MaPhong', 'NgayChieu', 'GioChieu', 'GiaVe']
-            });
-            XLSX.utils.book_append_sheet(wb, ws, 'SuatChieu');
-            XLSX.writeFile(wb, 'Danh_Sach_suat_chieu.xlsx');
-            alert('Xuất file thành công!');
-          }
-        </script>
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(data, {
+          header: [
+            "MaSuatChieu",
+            "TenPhong",
+            "MaPhong",
+            "NgayChieu",
+            "GioChieu",
+            "GiaVe",
+          ],
+        });
+        XLSX.utils.book_append_sheet(wb, ws, "SuatChieu");
+        XLSX.writeFile(wb, "Danh_Sach_suat_chieu.xlsx");
+        alert("Xuất file thành công!");
+      }
+    </script>
   </body>
 </html>

@@ -19,7 +19,9 @@ class SuatChieuAPI {
           localStorage.removeItem("token");
           window.location.href = "/frontend/login.html";
         }
-        throw new Error(`Error fetching suat chieu list: ${response.statusText}`);
+        throw new Error(
+          `Error fetching suat chieu list: ${response.statusText}`
+        );
       }
       return await response.json();
     } catch (error) {
@@ -42,7 +44,9 @@ class SuatChieuAPI {
           localStorage.removeItem("token");
           window.location.href = "/frontend/login.html";
         }
-        throw new Error(`Error fetching suat chieu by ID: ${response.statusText}`);
+        throw new Error(
+          `Error fetching suat chieu by ID: ${response.statusText}`
+        );
       }
       return await response.json();
     } catch (error) {
@@ -64,16 +68,21 @@ class SuatChieuAPI {
         },
         body: JSON.stringify(suatChieuData),
       });
+
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem("token");
           window.location.href = "/frontend/login.html";
         }
-        throw new Error(`Error creating suat chieu: ${response.statusText}`);
+        const data = await response.json();
+        throw new Error(
+          data.error || `Error creating suat chieu: ${response.statusText}`
+        );
       }
+
       return await response.json();
     } catch (error) {
-      console.error("Failed to create suat chieu:", error);
+      console.error("Lỗi tạo suất chiếu:", error);
       throw error;
     }
   }
@@ -872,58 +881,68 @@ async function editShowtime(id) {
 }
 
 async function saveShowtime() {
-    const form = document.getElementById("suatChieuForm");
-    if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-    }
+  const form = document.getElementById("suatChieuForm");
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
 
-    const gioChieuInput = document.getElementById("gioChieu").value;
-    let gioChieu;
-    
-    // Kiểm tra và chuẩn hóa định dạng GioChieu
-    if (gioChieuInput.match(/^\d{2}:\d{2}$/)) {
-        gioChieu = gioChieuInput + ":00"; // Thêm :00 nếu là HH:mm
-    } else if (gioChieuInput.match(/^\d{2}:\d{2}:\d{2}$/)) {
-        gioChieu = gioChieuInput; // Giữ nguyên nếu đã là HH:mm:ss
+  const gioChieuInput = document.getElementById("gioChieu").value;
+  let gioChieu;
+
+  // Kiểm tra và chuẩn hóa định dạng GioChieu
+  if (gioChieuInput.match(/^\d{2}:\d{2}$/)) {
+    gioChieu = gioChieuInput + ":00"; // Thêm :00 nếu là HH:mm
+  } else if (gioChieuInput.match(/^\d{2}:\d{2}:\d{2}$/)) {
+    gioChieu = gioChieuInput; // Giữ nguyên nếu đã là HH:mm:ss
+  } else {
+    showAlert("Giờ chiếu phải có định dạng HH:mm hoặc HH:mm:ss", "danger");
+    return;
+  }
+
+  const showtimeData = {
+    MaPhim: parseInt(document.getElementById("maPhim").value),
+    MaPhong: parseInt(document.getElementById("maPhong").value),
+    NgayChieu: document.getElementById("ngayChieu").value,
+    GioChieu: gioChieu,
+    GiaVe: parseFloat(document.getElementById("giaVe").value),
+  };
+  console.log("Sending showtimeData:", showtimeData);
+
+  // Kiểm tra dữ liệu
+  if (
+    isNaN(showtimeData.MaPhim) ||
+    isNaN(showtimeData.MaPhong) ||
+    isNaN(showtimeData.GiaVe)
+  ) {
+    showAlert(
+      "Dữ liệu không hợp lệ: Vui lòng kiểm tra các trường số",
+      "danger"
+    );
+    return;
+  }
+  if (!showtimeData.NgayChieu || !gioChieu.match(/^\d{2}:\d{2}:\d{2}$/)) {
+    showAlert("Ngày chiếu hoặc giờ chiếu không hợp lệ", "danger");
+    return;
+  }
+
+  try {
+    const showtimeId = document.getElementById("suatChieuId").value;
+    if (showtimeId) {
+      await SuatChieuAPI.updateSuatChieu(showtimeId, showtimeData);
+      showAlert("Cập nhật suất chiếu thành công!", "success");
     } else {
-        showAlert("Giờ chiếu phải có định dạng HH:mm hoặc HH:mm:ss", "danger");
-        return;
+      await SuatChieuAPI.createSuatChieu(showtimeData);
+      showAlert("Thêm suất chiếu thành công!", "success");
     }
-
-    const showtimeData = {
-        MaPhim: parseInt(document.getElementById("maPhim").value),
-        MaPhong: parseInt(document.getElementById("maPhong").value),
-        NgayChieu: document.getElementById("ngayChieu").value,
-        GioChieu: gioChieu,
-        GiaVe: parseFloat(document.getElementById("giaVe").value),
-    };
-    console.log("Sending showtimeData:", showtimeData);
-
-    // Kiểm tra dữ liệu
-    if (isNaN(showtimeData.MaPhim) || isNaN(showtimeData.MaPhong) || isNaN(showtimeData.GiaVe)) {
-        showAlert("Dữ liệu không hợp lệ: Vui lòng kiểm tra các trường số", "danger");
-        return;
-    }
-    if (!showtimeData.NgayChieu || !gioChieu.match(/^\d{2}:\d{2}:\d{2}$/)) {
-        showAlert("Ngày chiếu hoặc giờ chiếu không hợp lệ", "danger");
-        return;
-    }
-
-    try {
-        const showtimeId = document.getElementById("suatChieuId").value;
-        if (showtimeId) {
-            await SuatChieuAPI.updateSuatChieu(showtimeId, showtimeData);
-            showAlert("Cập nhật suất chiếu thành công!", "success");
-        } else {
-            await SuatChieuAPI.createSuatChieu(showtimeData);
-            showAlert("Thêm suất chiếu thành công!", "success");
-        }
-        bootstrap.Modal.getInstance(document.getElementById("suatChieuModal")).hide();
-        loadShowtimes();
-    } catch (error) {
-        showAlert("Lỗi khi lưu suất chiếu: " + error.message, "danger");
-    }
+    bootstrap.Modal.getInstance(
+      document.getElementById("suatChieuModal")
+    ).hide();
+    loadShowtimes();
+  } catch (error) {
+    showAlert("Lỗi khi lưu suất chiếu: " + error.message, "danger");
+    alert("Lỗi khi tạo suất chiếu: " + error.message);
+  }
 }
 
 async function deleteShowtime(id) {

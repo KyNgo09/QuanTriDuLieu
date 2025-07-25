@@ -171,6 +171,12 @@ async function loadSuatChieuOptions() {
   try {
     allSuatChieu = await VeAPI.getAllSuatChieu();
 
+    allSuatChieu.sort((a, b) => {
+      const dateA = new Date(`${a.NgayChieu}T${a.GioChieu}`);
+      const dateB = new Date(`${b.NgayChieu}T${b.GioChieu}`);
+      return dateB - dateA; // Sắp xếp từ mới đến cũ
+    });
+
     allSuatChieu.forEach((sc) => {
       const option = document.createElement("option");
       option.value = sc.MaSuatChieu;
@@ -609,9 +615,12 @@ async function addNewTicket() {
 
     console.log("Dữ liệu vé:", ticketData);
 
-    await VeAPI.addTicket(ticketData);
+    const ve_moi = await VeAPI.addTicket(ticketData);
 
-    showAlert("Thêm vé thành công", "success");
+    console.log("Vé mới:", ve_moi);
+
+    showAlert("Thêm vé thành công, Giá vé: " + ve_moi.data.GiaVe, "success");
+    alert("Thêm vé thành công, Giá vé: " + ve_moi.data.GiaVe + " VNĐ");
     bootstrap.Modal.getInstance(
       document.getElementById("ticketAddModal")
     ).hide();

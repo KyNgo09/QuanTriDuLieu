@@ -516,7 +516,7 @@ BEGIN
 
 		IF NOW() >= v_ThoiGianNgungDatVe THEN
 			SIGNAL SQLSTATE '45000'
-				SET MESSAGE_TEXT = 'Khong duoc dat ve sau khi con 15 phut nua la phim bat dau.';
+				SET MESSAGE_TEXT = 'Chi co the dat ve khi truoc gio chieu hon 15 phut.';
 		END IF;
 	
         SET NEW.NgayDat = NOW();
@@ -531,6 +531,11 @@ DELIMITER ;
 -- - thêm suất chiếu thì thời gian chiếu phải sau thời gian hiện tại ít nhất 1 ngày
 -- - và sau thời gian của suất chiếu trước đó (cùng phòng chiếu) phải cách một khoảng thời gian là thời lượng phim + 30 phút (dọn dẹp).
 -- - và không tồn tài suất chiếu nào (cùng phòng chiếu) có thời gian chiếu trước thời gian chiếu của suất chiếu mới + thời lượng phim + 30 phút (dọn dẹp).
+-- drop trigger trg_check_thoi_gian_them_suatchieu;
+
+-- INSERT INTO suatchieu (MaPhim, MaPhong, NgayChieu, GioChieu, GiaVe) VALUES
+-- (1, 1, '2025-07-25', '15:15:00', 80000.00);
+
 DELIMITER $$
 
 CREATE TRIGGER trg_check_thoi_gian_them_suatchieu

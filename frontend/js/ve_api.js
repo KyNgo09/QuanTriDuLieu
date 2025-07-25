@@ -141,6 +141,26 @@ class VeAPI {
       throw error;
     }
   }
+
+  static async getAllSuatChieu() {
+    const token = this.getToken();
+    if (!token) throw new Error("Vui lòng đăng nhập");
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/suatchieu/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching all SuatChieu:", error);
+      throw error;
+    }
+  }
 }
 
 async function loadSuatChieuOptions() {
@@ -148,16 +168,9 @@ async function loadSuatChieuOptions() {
   select.innerHTML = `<option value="">-- Chọn suất chiếu --</option>`;
 
   try {
-    const token = VeAPI.getToken();
-    const res = await fetch("http://127.0.0.1:5000/api/suatchieu/", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (!res.ok) throw new Error("Không thể tải danh sách suất chiếu");
-    const data = await res.json();
+    allSuatChieu = await VeAPI.getAllSuatChieu();
 
-    data.forEach((sc) => {
+    allSuatChieu.forEach((sc) => {
       const option = document.createElement("option");
       option.value = sc.MaSuatChieu;
       option.textContent = `SC${sc.MaSuatChieu} - ${sc.Phim?.TenPhim} (${sc.NgayChieu} ${sc.GioChieu})`;
@@ -173,6 +186,7 @@ let currentView = "table";
 let allTickets = [];
 let filteredTickets = [];
 let allTicketsWithInfo = [];
+let allSuatChieu = [];
 
 // Load Tickets
 async function loadTickets() {
@@ -605,47 +619,99 @@ async function addNewTicket() {
   }
 }
 
-async function updateSeatOptionsBySuatChieu(maSuatChieu) {
+async function updateHangGheOptionsBySuatChieu() {
   try {
-    const veDaDat = await VeAPI.getTicketsByMaSuatChieu(maSuatChieu);
-    const maGheDaDat = veDaDat.map((ve) => ve.MaGhe);
-
-    const gheConTrong = allSeats.filter(
-      (ghe) => !maGheDaDat.includes(ghe.MaGhe)
+    const maSuatChieu = parseInt(
+      document.getElementById("addMaSuatChieu").value
     );
 
-    const seatSelect = document.getElementById("selectGhe");
-    seatSelect.innerHTML = '<option value="">-- Chọn ghế --</option>';
+    const hangGheSelect = document.getElementById("selectHangGhe");
+    hangGheSelect.innerHTML = '<option value="">-- Chọn hàng ghế --</option>';
+    hangGheSelect.disabled = false;
 
-    gheConTrong.forEach((seat) => {
-      const option = document.createElement("option");
-      option.value = seat.MaGhe;
-      option.textContent = `Hàng ${seat.SoHang} - Ghế ${seat.STTGhe}`;
-      option.setAttribute("data-sohang", seat.SoHang);
-      option.setAttribute("data-sttghe", seat.STTGhe);
-      seatSelect.appendChild(option);
+    const suatChieu = allSuatChieu.find((sc) => sc.MaSuatChieu === maSuatChieu);
+
+    const gheTrongPhong = allSeats.filter(
+      (seat) => seat.MaPhong === suatChieu?.Phong.MaPhong
+    );
+
+    const hangGheSet = new Set();
+    gheTrongPhong.forEach((seat) => {
+      hangGheSet.add(seat.SoHang);
     });
 
-    if (gheConTrong.length === 0) {
+    hangGheSet.forEach((hang) => {
+      const option = document.createElement("option");
+      option.value = hang;
+      option.textContent = `Hàng ${hang}`;
+      option.setAttribute("data-sohang", hang);
+      hangGheSelect.appendChild(option);
+    });
+
+    if (hangGheSet.size === 0) {
       showAlert("Không còn ghế trống cho suất chiếu này", "warning");
     }
   } catch (err) {
-    console.error("Lỗi khi lọc ghế trống:", err);
-    showAlert("Không thể lọc ghế trống", "danger");
+    console.error("Lỗi khi cập nhật hàng ghế:", err);
+    showAlert("Không thể cập nhật hàng ghế: " + err.message, "danger");
   }
 }
 
-function renderSeatOptions() {
-  const seatSelect = document.getElementById("selectGhe");
-  seatSelect.innerHTML = '<option value="">-- Chọn ghế --</option>';
+async function updateSTTGheOptionsBySuatChieu() {
+  try {
+    const maSuatChieu = parseInt(
+      document.getElementById("addMaSuatChieu").value
+    );
+    const soHang = document.getElementById("selectHangGhe").value;
 
-  allSeats.forEach((seat) => {
+    const sttGheSelect = document.getElementById("selectSTTGhe");
+    sttGheSelect.innerHTML =
+      '<option value="">-- Chọn số thứ tự ghế --</option>';
+    sttGheSelect.disabled = false;
+
+    const suatChieu = allSuatChieu.find((sc) => sc.MaSuatChieu === maSuatChieu);
+
+    const gheTrongPhong = allSeats.filter(
+      (seat) =>
+        seat.MaPhong === suatChieu?.Phong.MaPhong && seat.SoHang == soHang
+    );
+
+    const sttGheSet = new Set();
+    gheTrongPhong.forEach((seat) => {
+      sttGheSet.add(seat.STTGhe);
+    });
+
+    sttGheSet.forEach((stt) => {
+      const option = document.createElement("option");
+      option.value = stt;
+      option.textContent = `${stt}`;
+      option.setAttribute("data-sohang", soHang);
+      sttGheSelect.appendChild(option);
+    });
+
+    if (STTGheSet.size === 0) {
+      showAlert("Không còn ghế trống cho suất chiếu này", "warning");
+    }
+  } catch (err) {
+    console.error("Lỗi khi cập nhật số thứ tự ghế:", err);
+    showAlert("Không thể cập nhật số thứ tự ghế: " + err.message, "danger");
+  }
+}
+
+function renderHangGheOptions() {
+  const hangGheSelect = document.getElementById("selectHangGhe");
+  hangGheSelect.innerHTML = '<option value="">-- Chọn hàng ghế --</option>';
+
+  const allHang = Array.from(new Set(allSeats.map((seat) => seat.SoHang))).sort(
+    (a, b) => a - b
+  );
+
+  allHang.forEach((hang) => {
     const option = document.createElement("option");
-    option.value = seat.MaGhe;
-    option.textContent = `Hàng ${seat.SoHang} - Ghế ${seat.STTGhe}`;
-    option.setAttribute("data-sohang", seat.SoHang);
-    option.setAttribute("data-sttghe", seat.STTGhe);
-    seatSelect.appendChild(option);
+    option.value = hang;
+    option.textContent = `Hàng ${hang}`;
+    option.setAttribute("data-sohang", hang);
+    hangGheSelect.appendChild(option);
   });
 }
 
@@ -783,14 +849,14 @@ function loadCardView(allTicketsWithInfo) {
 window.addEventListener("DOMContentLoaded", async () => {
   const addModal = document.getElementById("ticketAddModal");
   const searchInput = document.getElementById("searchInput");
-  document
-    .getElementById("addMaSuatChieu")
-    .addEventListener("change", async (e) => {
-      const maSuatChieu = e.target.value;
-      if (maSuatChieu) {
-        await updateSeatOptionsBySuatChieu(maSuatChieu);
-      }
-    });
+  // document
+  //   .getElementById("addMaSuatChieu")
+  //   .addEventListener("change", async (e) => {
+  //     const maSuatChieu = e.target.value;
+  //     if (maSuatChieu) {
+  //       await updateSeatOptionsBySuatChieu(maSuatChieu);
+  //     }
+  //   });
   if (searchInput) {
     searchInput.addEventListener("input", handleSearch);
   }
@@ -800,6 +866,6 @@ window.addEventListener("DOMContentLoaded", async () => {
   });
 
   await loadSeats();
-  renderSeatOptions();
+  // renderSeatOptions();
   loadTickets();
 });

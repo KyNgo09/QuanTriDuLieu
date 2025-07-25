@@ -320,18 +320,40 @@
                       class="ultra-form-control"
                       id="addMaSuatChieu"
                       required
+                      onchange="updateHangGheOptionsBySuatChieu()"
                     >
                       <option value="">-- Chọn suất chiếu --</option>
                     </select>
                   </div>
                 </div>
-                <div class="col-md-12">
+                <div class="col-md-6">
                   <div class="ultra-form-group">
-                    <label for="selectGhe" class="ultra-form-label">
-                      <i class="fas fa-chair me-2"></i>Chọn Ghế
+                    <label for="selectHangGhe" class="ultra-form-label">
+                      <i class="fas fa-envelope me-2"></i>Hàng Ghế
                     </label>
-                    <select class="ultra-form-control" id="selectGhe" required>
-                      <option value="">-- Chọn ghế --</option>
+                    <select
+                      class="ultra-form-control"
+                      id="selectHangGhe"
+                      required
+                      disabled
+                      onchange="updateSTTGheOptionsBySuatChieu()"
+                    >
+                      <option value="">-- Chọn hàng ghế --</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="ultra-form-group">
+                    <label for="selectSTTGhe" class="ultra-form-label">
+                      <i class="fas fa-chair me-2"></i>Số Thứ Tự Ghế
+                    </label>
+                    <select
+                      class="ultra-form-control"
+                      id="selectSTTGhe"
+                      required
+                      disabled
+                    >
+                      <option value="">-- Chọn số thứ tự ghế --</option>
                     </select>
                   </div>
                 </div>

@@ -29,7 +29,7 @@ class VeAPI {
     const token = this.getToken();
     if (!token) throw new Error("Vui lòng đăng nhập");
     try {
-      const response = await fetch(`${API_BASE_URL}/ve/dat-ve`, {
+      const response = await fetch(`${API_BASE_URL}/ve/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -37,12 +37,13 @@ class VeAPI {
         },
         body: JSON.stringify(ticketData),
       });
+      const data = await response.json();
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(data.error || `HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return data;
     } catch (error) {
-      console.error("Error adding vé:", error);
+      console.error("Lỗi tạo vé:", error);
       throw error;
     }
   }
@@ -553,13 +554,16 @@ async function addNewTicket() {
   const tenKH = document.getElementById("addTenKH").value;
   const maSuatChieu = document.getElementById("addMaSuatChieu").value;
 
-  const selectGheEl = document.getElementById("selectGhe");
-  const maGhe = selectGheEl.value;
-  const selectedOption = selectGheEl.options[selectGheEl.selectedIndex];
-  const soHang = selectedOption.getAttribute("data-sohang");
-  const sttGhe = selectedOption.getAttribute("data-sttghe");
+  const hangGhe = document.getElementById("selectHangGhe").value;
+  const sttGhe = document.getElementById("selectSTTGhe").value;
 
-  if (!tenKH || !maGhe || !maSuatChieu || !giaVe) {
+  const ghe = allSeats.find(
+    (seat) => seat.SoHang === hangGhe && seat.STTGhe === Number(sttGhe)
+  );
+
+  const maGhe = ghe ? ghe.MaGhe : null;
+
+  if (!tenKH || !maGhe || !maSuatChieu) {
     showAlert("Vui lòng nhập đầy đủ thông tin", "danger");
     return;
   }
@@ -569,11 +573,7 @@ async function addNewTicket() {
     return;
   }
 
-  const selectedGhe = allSeats.find(
-    (ghe) => ghe.SoHang === soHang && ghe.STTGhe === Number(sttGhe)
-  );
-
-  if (!selectedGhe) {
+  if (!ghe) {
     showAlert("Không tìm thấy ghế phù hợp", "danger");
     return;
   }
@@ -603,19 +603,22 @@ async function addNewTicket() {
 
     const ticketData = {
       MaKH: maKH,
-      MaGhe: selectedGhe.MaGhe,
+      MaGhe: maGhe,
       MaSuatChieu: parseInt(maSuatChieu),
     };
+
+    console.log("Dữ liệu vé:", ticketData);
 
     await VeAPI.addTicket(ticketData);
 
     showAlert("Thêm vé thành công", "success");
     bootstrap.Modal.getInstance(
-      document.getElementById("addTicketModal")
+      document.getElementById("ticketAddModal")
     ).hide();
     loadTickets();
   } catch (error) {
-    showAlert("Lỗi khi thêm vé: " + error.message, "danger");
+    showAlert(error.message);
+    alert(error.message);
   }
 }
 
@@ -689,7 +692,7 @@ async function updateSTTGheOptionsBySuatChieu() {
       sttGheSelect.appendChild(option);
     });
 
-    if (STTGheSet.size === 0) {
+    if (sttGheSet.size === 0) {
       showAlert("Không còn ghế trống cho suất chiếu này", "warning");
     }
   } catch (err) {

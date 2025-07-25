@@ -74,7 +74,7 @@ def create_ve():
         
         # Nếu không có ngày đặt, sử dụng CURRENT_TIMESTAMP
         cursor.execute("""
-            INSERT INTO ve (MaSuatChieu, MaKH, MaGhe, GiaVe, TrangThai)
+            INSERT INTO ve (MaSuatChieu, MaKH, MaGhe)
             VALUES (%s, %s, %s)
         """, (ma_suat_chieu, ma_kh, ma_ghe))
         
@@ -100,7 +100,7 @@ def create_ve():
     except Exception as e:
         if conn:
             conn.rollback()
-        return jsonify({"message": "Lỗi khi thêm vé", "error": str(e)}), 500
+        return jsonify({"message": "Lỗi khi thêm vé", "error": str(e)}), 400
     finally:
         if cursor:
             cursor.close()
